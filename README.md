@@ -1,2 +1,2 @@
-# RC-2015
-Repositorio para a cadeira de Redes e Computadores 2015
+# IA-2015
+Repositorio para a cadeira de Inteligencia Artifical 2015
