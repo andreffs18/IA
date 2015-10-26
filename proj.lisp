@@ -63,7 +63,7 @@
     ; valida de os valores da nlinha e ncoluna sao validos
     ; (se estao dentro dos limites do campo)
     ; nao interessa o valor devolvido (deve devolver nada)??
-    (declare (ignore nlinha ncoluna))
+    (declare (ignore tabuleiro nlinha ncoluna))
 )
 
 ;;; tabuleiro-remove-linha!: tabuleiro x inteiro -> {}
