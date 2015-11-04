@@ -1,44 +1,26 @@
 ;;;    Projecto de Inteligencia Artificial     ;;;
 ;;;              1a Entrega                    ;;;
 ;;;               Grupo 54                     ;;;
-;;;          	Ana Galvao 75312	           ;;;
+;;;             Ana Galvao 75312               ;;;
 ;;;       Jose Diogo Oliveira 75255            ;;;
-;;;    			Andre Silva 75455		       ;;;
+;;;             Andre Silva 75455              ;;;
 (defconstant T-NLINHAS 18)  ; 0 a 17
 (defconstant T-NCOLUNAS 10) ; 0 a 9
 
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;                                                                                   ;;;;;;;;;;;
-;;;;;;;;;;;;                                  ACCOES                                        ;;;;;;;;;;;
-;;;;;;;;;;;;                                                                                   ;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 ;;; cria-accao: inteiro x array -> accao
 (defun cria-accao (pos_esq config)
-	(cons pos_esq config)
+    (cons pos_esq config)
 )
 
 ;;; accao-coluna: accao-coluna: accao -> inteiro
 (defun accao-coluna (accao)
-	(car accao)
+    (car accao)
 )
 
 ;;; accao-peca: accao -> array
 (defun accao-peca(accao)
-	(cdr accao)
+    (cdr accao)
 )
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;                                                                                   ;;;;;;;;;;;
-;;;;;;;;;;;;                                  TABULEIRO                                        ;;;;;;;;;;;
-;;;;;;;;;;;;                                                                                   ;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;; cria-tabuleiro {} -> tabuleiro
 (defun cria-tabuleiro ()
@@ -49,9 +31,10 @@
 
 ;;; copia-tabuleiro: tabuleiro -> tabuleiro
 (defun copia-tabuleiro (tabuleiro)
-	(make-tabuleiro :linhas (tabuleiro-linhas t1)
-                    :colunas (tabuleiro-colunas t1)
-    (declare (ignore tabuleiro))
+    ;funcao para copiar o antigo tabuleiro para um novo
+    (make-array (array-total-size tabuleiro)
+                :displaced-to tabuleiro
+                :element-type (array-element-type tabuleiro))
 )
 
 ;;; tabuleiro-preenchido-p: tabuleiro x inteiro x inteiro -> logico
@@ -75,7 +58,7 @@
     )
 )
 
-;;; tabuleiro-linha-completa-p: tabuleiro x inteiro -> lógico
+;;; tabuleiro-linha-completa-p: tabuleiro x inteiro -> lgico
 (defun tabuleiro-linha-completa-p (tabuleiro nlinha)
     ; devolve true se todas as posicoes da linha inteira
     ; estiverem preenchidas
@@ -93,8 +76,8 @@
     ; (se estao dentro dos limites do campo)
     ; nao interessa o valor devolvido (deve devolver nada)??
     (cond
-        ((OR (< nlinha 0) (>= nlinha T-NLINHAS)) (format t "Posicao invalida. Apenas [0, 17] linhas"))
-        ((OR (< ncoluna 0) (>= ncoluna T-NCOLUNAS)) (format t "Posicao invalida. Apenas [0, 9] colunas"))
+        ((OR (< nlinha 0) (>= nlinha T-NLINHAS)) ()) ;(format t "Posicao invalida. Apenas [0, 17] linhas"))
+        ((OR (< ncoluna 0) (>= ncoluna T-NCOLUNAS)) ()) ;(format t "Posicao invalida. Apenas [0, 9] colunas"))
         (t (setf (aref tabuleiro nlinha ncoluna) t))
     )
 )
@@ -104,6 +87,7 @@
     ; remove a nlinha do tabuleiro
     ; fazendo com que as linhas consecutivas, descam
     ; nao interessa o valor devolvido (deve devolver nada)??
+    (let ((linha-de-cima nil))
     (dotimes (col T-NCOLUNAS t)
         (loop for lin from nlinha to (- T-NLINHAS 1)
            do (progn
@@ -114,7 +98,7 @@
                 (setf (aref tabuleiro lin col) linha-de-cima)
             )
         )
-    )
+    ))
 )
 
 ;;; tabuleiro-topo-preenchido-p: tabuleiro -> logico
@@ -135,11 +119,11 @@
 ;;; tabuleiro->array: tabuleiro -> array
 (defun tabuleiro->array (tabuleiro)
     ; recebe um tabuleiro e devolve um novo array com 18
-    ; linhas e 10 colunas que em cada linha e coluna deverá conter
+    ; linhas e 10 colunas que em cada linha e coluna dever conter
     ; o valor logico
     ; o tabuleiro retornado e um novo objecto ( nao o mesmo que o tabuleiro)
     ; http://stackoverflow.com/questions/9549568/common-lisp-convert-between-lists-and-arrays
-    (declare (ignore tabuleiro))
+    (return-from tabuleiro->array tabuleiro)
 )
 
 ;;; array->tabuleiro: array->tabuleiro
@@ -148,8 +132,7 @@
     ; devolve um tabuleiro object
     ; novo objecto (nao o mesmo que o array)
     ; http://stackoverflow.com/questions/9549568/common-lisp-convert-between-lists-and-arrays
-    (declare (ignore array))
-
+    (return-from array->tabuleiro array)
 )
 
 ;;; creates type Estado
@@ -164,22 +147,28 @@
 (defun copia-estado (estado)
     ; devolve novo estado cujo conteudo sera copiado do arg
     ; devolve novo objecto, nao destrutivo do antigo
-    (declare (ignore estado))
+    (make-estado
+        :pontos (estado-pontos estado)
+        :pecas-por-colocar (estado-pecas-por-colocar estado)
+        :pecas-colocadas (estado-pecas-colocadas estado)
+        :tabuleiro (estado-tabuleiro estado)
+    )
 )
+
 
 ;;; estados-iguais-p: estado x estado -> logico
 (defun estados-iguais-p (estado1 estado2)
     ; devolve true se os 2 estados forem iguais
-    (declare (ignore estado1 estado2))
+    (equalp estado1 estado2)
 )
 
 ;;; estado-final-p: estado -> logico
 (defun estado-final-p (estado)
     ; devolve true caso seja um estado final
-    ; (jogador nao pode fazer mais jogadas)
+    ; (jogador nao pode fazer mais jogadas) (pecas por colocar zerop)
     ; false caso contrario
     ; tiver atingido o topo ou nao tiver mais pecas por colocar
-    (declare (ignore estado))
+    (zerop (length (estado-pecas-por-colocar estado)))
 )
 
 ;;;  creates type Problema
@@ -218,12 +207,12 @@
     ; resultda de aplica a cao ao estado original
     ; NAO e destrutivo, ou seja, novo obejcto e gerado
     ; pseudo algo:
-    ; deve actualizar as listas de peças,
-    ; colocar a peça especificada pela acção na posição correcta
-    ; depois de colocada a peça,
-    ; verifica se o topo do tabuleiro está preenchido;
-    ; caso sim:não se removem linhas e devolve-se o estado
-    ; case não:removem-se as linhas e calculam-se os pontos obtidos
+    ; deve actualizar as listas de pecas,
+    ; colocar a pea especificada pela aco na posio correcta
+    ; depois de colocada a pea,
+    ; verifica se o topo do tabuleiro est preenchido;
+    ; caso sim:no se removem linhas e devolve-se o estado
+    ; case no:removem-se as linhas e calculam-se os pontos obtidos
     (declare (ignore estado accao))
 )
 
@@ -254,7 +243,7 @@ Algoritmos de Procura (2' parte do projecto)
     ; devolve lsita de acoes que se executa pela ordem especifica
     ; leva de um estado inicial ao objectivo
     ; deve utilizar LIFO (last in first out)
-    ; ultimo nó a ser colocado na fronteira deverá ser o primeiro a ser explorado.
+    ; ultimo n a ser colocado na fronteira dever ser o primeiro a ser explorado.
     ; generico.. nao so para o tetris mas para qualquer problema
     (declare (ignore problema))
 )
@@ -278,22 +267,5 @@ Algoritmos de Procura (2' parte do projecto)
     (declare (ignore array lista-pecas))
 )
 
-
-
-(setf tab (cria-tabuleiro))
-(dotimes (n T-NCOLUNAS)
-    (tabuleiro-preenche! tab 5 n)
-    (tabuleiro-preenche! tab 6 n)
-    (tabuleiro-preenche! tab 7 n)
-    (tabuleiro-preenche! tab 15 n)
-    (if (eq (mod n 2) 0)
-        (tabuleiro-preenche! tab 16 n)
-    )
-    (tabuleiro-preenche! tab 17 n)
-
-)
-(format t "~d ~%" tab)
-
-; replace with this one when submiting on mooshak
-; (load "utils.fas")
-; (load (compile-file "utils.lisp"))
+(load "utils.fas")
+;(load (compile-file "utils.lisp"))
