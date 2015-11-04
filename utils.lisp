@@ -26,6 +26,11 @@
 (defconstant peca-t2 (make-array (list 2 3) :initial-contents '((nil T nil)(T T T))))
 (defconstant peca-t3 (make-array (list 3 2) :initial-contents '((nil T)(T T)(nil T))))
 
+;; acrescentei algumas funcoes auxiliares que vao dar jeito para testar automaticamente o codigo dos alunos
+(defun ignore-value (x)
+  (declare (ignore x))
+  'ignore)
+
 ;;; random-element: list --> universal
 ;;; funcao que dada uma lista, devolve um elemento aleatorio dessa lista
 ;;; se a lista recebida for vazia, e devolvido nil
@@ -51,15 +56,15 @@
 ;;; de preenchimento, resultado em media mais posicoes preenchidas no fundo do tabuleiro do que no topo.
 (defun cria-tabuleiro-aleatorio (&optional (prob-inicial 1.0) (decaimento 0.05))
   (let ((tabuleiro (cria-tabuleiro))
-    (prob prob-inicial)
-    (coluna-a-evitar 0))
+      (prob prob-inicial)
+      (coluna-a-evitar 0))
     (dotimes (linha 18)
-            ;;;precisamos de escolher sempre uma coluna para nao preencher, se nao podemos correr o risco de criarmos uma linha
-            ;;;completamente preenchida
+      ;;;precisamos de escolher sempre uma coluna para nao preencher, se nao podemos correr o risco de criarmos uma linha
+      ;;;completamente preenchida
       (setf coluna-a-evitar (random 10))
       (dotimes (coluna 10)
-    (when (and (not (= coluna-a-evitar coluna)) (<= (random 1.0) prob)) (tabuleiro-preenche! tabuleiro linha coluna)))
-            ;;;nao podemos permitir valores negativos de probabilidade
+        (when (and (not (= coluna-a-evitar coluna)) (<= (random 1.0) prob)) (tabuleiro-preenche! tabuleiro linha coluna)))
+      ;;;nao podemos permitir valores negativos de probabilidade
       (setf prob (max 0 (- prob decaimento))))
     tabuleiro))
 
@@ -100,9 +105,9 @@
   (format T "| ")
   (dotimes (coluna 10)
     (format T "~A " (cond ((null accao) " ")
-              ((and (array-in-bounds-p (accao-peca accao) linha (- coluna (accao-coluna accao)))
-                (aref (accao-peca accao) linha (- coluna (accao-coluna accao)))) "#")
-              (T " "))))
+                ((and (array-in-bounds-p (accao-peca accao) linha (- coluna (accao-coluna accao)))
+                  (aref (accao-peca accao) linha (- coluna (accao-coluna accao)))) "#")
+                (T " "))))
   (format T "|"))
 
 ;;; desenha-linha-exterior: {} --> {}
@@ -141,4 +146,10 @@
 (dotimes (coluna 9)
   (tabuleiro-preenche! t1 1 coluna))
 (defvar e1 (make-estado :tabuleiro t1 :pecas-por-colocar '(i o j l t i)))
-(defvar p1 (formulacao-problema t1 '(i o j l t i)))
+
+(defvar p1
+  (make-problema :estado-inicial (make-estado :tabuleiro t1 :pecas-por-colocar '(i o j l t i))
+           :solucao #'solucao
+           :accoes #'accoes
+           :resultado #'resultado
+           :custo-caminho #'custo-oportunidade))
