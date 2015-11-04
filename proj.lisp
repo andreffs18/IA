@@ -5,6 +5,8 @@
 ;;;       Jose Diogo Oliveira 75255            ;;;
 ;;;    			Andre Silva 75455		       ;;;
 
+(defconstant T-NLINHAS 18)  ; 0 a 17
+(defconstant T-NCOLUNAS 10) ; 0 a 9
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -43,6 +45,7 @@
 (defun cria-tabuleiro ()
     ; criar o tabuleiro
     ; devolve tabuleiro vazio
+    (make-array (list T-NLINHAS T-NCOLUNAS) :initial-element nil)
 )
 
 ;;; copia-tabuleiro: tabuleiro -> tabuleiro
@@ -56,23 +59,30 @@
 (defun tabuleiro-preenchido-p (tabuleiro nlinha ncoluna)
     ; devolve true se tiver preenchida
     ; false caso contrario
-    (declare (ignore tabuleiro nlinha ncoluna))
+    (not (eq nil (aref tabuleiro nlinha ncoluna)))
 )
-
+;;; TODO
 ;;; tabuleiro-altura-coluna: tabuleiro x inteiro -> inteiro
 (defun tabuleiro-altura-coluna (tabuleiro ncoluna)
     ; devolve a posicao mais alta que esteja preenchida
     ; da coluna em questao
     ; devolve zero caso nao esteja preenchida
-    (declare (ignore tabuleiro ncoluna))
+    (dotimes (n T-NLINHAS) nil
+        (format t "~d ~%" n)
+        (if (eq t (aref tabuleiro n ncoluna))
+            (return n)
+        )
+    )
 )
 
 ;;; tabuleiro-linha-completa-p: tabuleiro x inteiro -> lógico
 (defun tabuleiro-linha-completa-p (tabuleiro nlinha)
-    ; devolve true se todas as posicoes da linha inteiro
+    ; devolve true se todas as posicoes da linha inteira
     ; estiverem preenchidas
     ; false, otherwise
-    (declare (ignore tabuleiro nlinha))
+    (loop for coluna in tabuleiro
+        do ( format t "~d ~%" coluna)
+    )
 )
 
 ;;; tabuleiro-preenche!: tabuleiro x inteiro x inteiro -> {}
@@ -82,7 +92,11 @@
     ; valida de os valores da nlinha e ncoluna sao validos
     ; (se estao dentro dos limites do campo)
     ; nao interessa o valor devolvido (deve devolver nada)??
-    (declare (ignore tabuleiro nlinha ncoluna))
+    (cond
+        (or (< nlinha 0) (> nlinha T-NLINHAS)) (format t "Posicao invalida. Apenas 18 linhas")
+        (or (< ncoluna 0) (> ncoluna T-NCOLUNAS)) (format t "Posicao invalida. Apenas 10 colunas")
+        (t (setf (aref tabuleiro nlinha ncoluna) t))
+    )
 )
 
 ;;; tabuleiro-remove-linha!: tabuleiro x inteiro -> {}
@@ -248,3 +262,7 @@ Algoritmos de Procura (2' parte do projecto)
     ;;;;;; este e o avaliado
     (declare (ignore array lista-pecas))
 )
+
+; replace with this one when submiting on mooshak
+; (load "utils.fas")
+; (load (compile-file "utils.lisp"))
