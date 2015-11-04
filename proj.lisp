@@ -44,9 +44,6 @@
 (defun cria-tabuleiro ()
     ; criar o tabuleiro
     ; devolve tabuleiro vazio
-    ; (let ((linha (make-list T-NLINHAS nil)))
-    ;    (make-list T-NCOLUNAS linha)
-    ; )
     (make-array (list T-NLINHAS T-NCOLUNAS) :initial-element nil)
 )
 
@@ -108,18 +105,13 @@
     ; fazendo com que as linhas consecutivas, descam
     ; nao interessa o valor devolvido (deve devolver nada)??
     (dotimes (col T-NCOLUNAS t)
-        (dotimes (lin T-NLINHAS t)
-            (cond
-                ((< lin nlinha) ()) ; nao faz nada ate chegar a linha "nlinha"
-                (t  ; shift das linhas de cima para baixo
-                    (progn
-                        (cond
-                            ((< lin (- T-NLINHAS 1)) (setf linha-de-cima (aref tabuleiro (+ lin 1) col)))
-                            (t (setf linha-de-cima nil))
-                        )
-                        (setf (aref tabuleiro lin col) linha-de-cima)
-                    )
+        (loop for lin from nlinha to (- T-NLINHAS 1)
+           do (progn
+                (cond
+                    ((< lin (- T-NLINHAS 1)) (setf linha-de-cima (aref tabuleiro (+ lin 1) col)))
+                    (t (setf linha-de-cima nil))
                 )
+                (setf (aref tabuleiro lin col) linha-de-cima)
             )
         )
     )
