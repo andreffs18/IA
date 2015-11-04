@@ -4,7 +4,6 @@
 ;;;          	Ana Galvao 75312	           ;;;
 ;;;       Jose Diogo Oliveira 75255            ;;;
 ;;;    			Andre Silva 75455		       ;;;
-
 (defconstant T-NLINHAS 18)  ; 0 a 17
 (defconstant T-NCOLUNAS 10) ; 0 a 9
 
@@ -45,6 +44,9 @@
 (defun cria-tabuleiro ()
     ; criar o tabuleiro
     ; devolve tabuleiro vazio
+    ; (let ((linha (make-list T-NLINHAS nil)))
+    ;    (make-list T-NCOLUNAS linha)
+    ; )
     (make-array (list T-NLINHAS T-NCOLUNAS) :initial-element nil)
 )
 
@@ -58,19 +60,20 @@
 ;;; tabuleiro-preenchido-p: tabuleiro x inteiro x inteiro -> logico
 (defun tabuleiro-preenchido-p (tabuleiro nlinha ncoluna)
     ; devolve true se tiver preenchida
-    ; false caso contrario
-    (not (eq nil (aref tabuleiro nlinha ncoluna)))
+    ; nil caso contrario
+    (not (null (aref tabuleiro nlinha ncoluna)))
 )
-;;; TODO
+
 ;;; tabuleiro-altura-coluna: tabuleiro x inteiro -> inteiro
 (defun tabuleiro-altura-coluna (tabuleiro ncoluna)
     ; devolve a posicao mais alta que esteja preenchida
     ; da coluna em questao
     ; devolve zero caso nao esteja preenchida
-    (dotimes (n T-NLINHAS) nil
-        (format t "~d ~%" n)
-        (if (eq t (aref tabuleiro n ncoluna))
-            (return n)
+    (let ((altura nil))
+        (dotimes (lin T-NLINHAS altura)
+            (if (not (null (aref tabuleiro lin ncoluna)))
+                (setf altura (+ lin 1))
+            )
         )
     )
 )
@@ -80,8 +83,8 @@
     ; devolve true se todas as posicoes da linha inteira
     ; estiverem preenchidas
     ; false, otherwise
-    (loop for coluna in tabuleiro
-        do ( format t "~d ~%" coluna)
+    (dotimes (col T-NCOLUNAS t)
+        (if (null (aref tabuleiro nlinha col)) (return nil))
     )
 )
 
@@ -93,8 +96,8 @@
     ; (se estao dentro dos limites do campo)
     ; nao interessa o valor devolvido (deve devolver nada)??
     (cond
-        (or (< nlinha 0) (> nlinha T-NLINHAS)) (format t "Posicao invalida. Apenas 18 linhas")
-        (or (< ncoluna 0) (> ncoluna T-NCOLUNAS)) (format t "Posicao invalida. Apenas 10 colunas")
+        ((OR (< nlinha 0) (>= nlinha T-NLINHAS)) (format t "Posicao invalida. Apenas [0, 17] linhas"))
+        ((OR (< ncoluna 0) (>= ncoluna T-NCOLUNAS)) (format t "Posicao invalida. Apenas [0, 9] colunas"))
         (t (setf (aref tabuleiro nlinha ncoluna) t))
     )
 )
@@ -104,20 +107,37 @@
     ; remove a nlinha do tabuleiro
     ; fazendo com que as linhas consecutivas, descam
     ; nao interessa o valor devolvido (deve devolver nada)??
-    (declare (ignore tabuleiro nlinha))
+    (dotimes (col T-NCOLUNAS t)
+        (dotimes (lin T-NLINHAS t)
+            (cond
+                ((< lin nlinha) ()) ; nao faz nada ate chegar a linha "nlinha"
+                (t  ; shift das linhas de cima para baixo
+                    (progn
+                        (cond
+                            ((< lin (- T-NLINHAS 1)) (setf linha-de-cima (aref tabuleiro (+ lin 1) col)))
+                            (t (setf linha-de-cima nil))
+                        )
+                        (setf (aref tabuleiro lin col) linha-de-cima)
+                    )
+                )
+            )
+        )
+    )
 )
 
 ;;; tabuleiro-topo-preenchido-p: tabuleiro -> logico
 (defun tabuleiro-topo-preenchido-p (tabuleiro)
     ; devolve true se existir uma coluna preenchida
     ; na linha 17 do tabuleiro
-    (declare (ignore tabuleiro))
+    (dotimes (col T-NCOLUNAS t)
+        (if (null (aref tabuleiro (1- T-NLINHAS) col)) (return nil))
+    )
 )
 
 ;;; tabuleiros-iguais-p: tabuleiro x tabuleiro -> logico
 (defun tabuleiros-iguais-p (tabuleiro1 tabuleiro2)
     ; devolve true se os 2 tabuleiros tiverem valores iguais
-    (declare (ignore tabuleiro1 tabuleiro2))
+    (equalp tabuleiro1 tabuleiro2)
 )
 
 ;;; tabuleiro->array: tabuleiro -> array
@@ -126,6 +146,7 @@
     ; linhas e 10 colunas que em cada linha e coluna deverá conter
     ; o valor logico
     ; o tabuleiro retornado e um novo objecto ( nao o mesmo que o tabuleiro)
+    ; http://stackoverflow.com/questions/9549568/common-lisp-convert-between-lists-and-arrays
     (declare (ignore tabuleiro))
 )
 
@@ -134,7 +155,9 @@
     ; da a entrada do array com 18 linhas e 10 colunas
     ; devolve um tabuleiro object
     ; novo objecto (nao o mesmo que o array)
+    ; http://stackoverflow.com/questions/9549568/common-lisp-convert-between-lists-and-arrays
     (declare (ignore array))
+
 )
 
 ;;; creates type Estado
@@ -262,6 +285,22 @@ Algoritmos de Procura (2' parte do projecto)
     ;;;;;; este e o avaliado
     (declare (ignore array lista-pecas))
 )
+
+
+
+(setf tab (cria-tabuleiro))
+(dotimes (n T-NCOLUNAS)
+    (tabuleiro-preenche! tab 5 n)
+    (tabuleiro-preenche! tab 6 n)
+    (tabuleiro-preenche! tab 7 n)
+    (tabuleiro-preenche! tab 15 n)
+    (if (eq (mod n 2) 0)
+        (tabuleiro-preenche! tab 16 n)
+    )
+    (tabuleiro-preenche! tab 17 n)
+
+)
+(format t "~d ~%" tab)
 
 ; replace with this one when submiting on mooshak
 ; (load "utils.fas")
