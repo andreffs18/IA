@@ -50,9 +50,9 @@
     ; da coluna em questao
     ; devolve zero caso nao esteja preenchida
     (let ((altura nil))
-        (dotimes (lin T-NLINHAS altura)
-            (if (not (null (aref tabuleiro lin ncoluna)))
-                (setf altura (+ lin 1))
+        (dotimes (lin T-NLINHAS altura)  ; vou percorrer as linhas todas e returnar a altura
+            (if (not (null (aref tabuleiro lin ncoluna)))  ; se a current altura nao for nil
+                (setf altura (+ lin 1))  ; actualizo a var altura para a mais actual
             )
         )
     )
@@ -155,7 +155,6 @@
     )
 )
 
-
 ;;; estados-iguais-p: estado x estado -> logico
 (defun estados-iguais-p (estado1 estado2)
     ; devolve true se os 2 estados forem iguais
@@ -168,7 +167,8 @@
     ; (jogador nao pode fazer mais jogadas) (pecas por colocar zerop)
     ; false caso contrario
     ; tiver atingido o topo ou nao tiver mais pecas por colocar
-    (zerop (length (estado-pecas-por-colocar estado)))
+    (OR (zerop (length (estado-pecas-por-colocar estado)))  ; se nao tiver pecas por colocar
+        (tabuleiro-topo-preenchido-p (estado-tabuleiro estado)))  ; se tiver o topo preenchido
 )
 
 ;;;  creates type Problema
@@ -187,7 +187,7 @@
     ; solucao (true) se o topo nao tiver preenchido e se nao
     ; existirem pecas por colocar.
     ; (ter pontos nao interessa)
-    (declare (ignore estado))
+    (estado-final-p estado)
 )
 
 ;;; accoes: estado -> lista de acoes
@@ -204,7 +204,7 @@
 ;;; resultado: estado x accao -> estado
 (defun resultado (estado accao)
     ; recebe estado e acao e devolve o novo estado que
-    ; resultda de aplica a cao ao estado original
+    ; resultda de aplica a acao ao estado original
     ; NAO e destrutivo, ou seja, novo obejcto e gerado
     ; pseudo algo:
     ; deve actualizar as listas de pecas,
