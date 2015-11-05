@@ -9,7 +9,14 @@
 
 ;;; cria-accao: inteiro x array -> accao
 (defun cria-accao (pos_esq config)
-    (make-accao :pos_esq pos :config config)
+    ;(setf accao (make-array 2))
+    ;(setf (aref accao 0) pos_esq)
+    ;(setf (aref accao 1) config)
+    (cons pos_esq config)
+
+    ;(make-accao :pos_esq pos :config config)
+    ;(make-array 2 :initial-contents '(pos_esq config))
+    ;(setq accao (pos_esq (append 'config accao))
 )
 
 ;;; accao-coluna: accao-coluna: accao -> inteiro
@@ -29,9 +36,30 @@
     (make-array (list T-NLINHAS T-NCOLUNAS) :initial-element nil)
 )
 
+;;; Aux function copy-arrays
+(defun copy-array (array &key
+                   (element-type (array-element-type array))
+                   (fill-pointer (and (array-has-fill-pointer-p array)
+                                      (fill-pointer array)))
+                   (adjustable (adjustable-array-p array)))
+  "Returns an undisplaced copy of ARRAY, with same fill-pointer and
+adjustability (if any) as the original, unless overridden by the keyword
+arguments."
+  (let* ((dimensions (array-dimensions array))
+         (new-array (make-array dimensions
+                                :element-type element-type
+                                :adjustable adjustable
+                                :fill-pointer fill-pointer)))
+    (dotimes (i (array-total-size array))
+      (setf (row-major-aref new-array i)
+            (row-major-aref array i)))
+    new-array))
+
 ;;; copia-tabuleiro: tabuleiro -> tabuleiro
 (defun copia-tabuleiro (tabuleiro)
     ;funcao para copiar o antigo tabuleiro para um novo
+
+    ;(copy-array(tabuleiro))
     (make-array (array-total-size tabuleiro)
                 :displaced-to tabuleiro
                 :element-type (array-element-type tabuleiro))
@@ -49,10 +77,13 @@
     ; devolve a posicao mais alta que esteja preenchida
     ; da coluna em questao
     ; devolve zero caso nao esteja preenchida
-    (let ((altura nil))
-        (dotimes (lin T-NLINHAS altura)
-            (if (not (null (aref tabuleiro lin ncoluna)))
-                (setf altura (+ lin 1))
+    ;METI altura iniciar a ZERO no let, para devolver 0 e nao nil quando a coluna nao tiver nenhuma peca
+
+    (let ((altura 0))
+        (dotimes (lin T-NLINHAS altura)  ; vou percorrer as linhas todas e returnar a altura
+            (if (not (null (aref tabuleiro lin ncoluna)))  ; se a current altura nao for nil
+                (setf altura (+ lin 1))  ; actualizo a var altura para a mais actual
+
             )
         )
     )
@@ -75,6 +106,9 @@
     ; valida de os valores da nlinha e ncoluna sao validos
     ; (se estao dentro dos limites do campo)
     ; nao interessa o valor devolvido (deve devolver nada)??
+    ;(if (AND (AND (>= nlinha 0) (< nlinha T-NLINHAS)) (AND (>= ncoluna 0) (< ncoluna T-NCOLUNAS))) (setf (aref tabuleiro nlinha ncoluna) T) )
+    ;TROQUEI AS VARIAVEIS NCOLUNA E NLINHA - O PROF CHAMA AO CONTRARIO
+
     (cond
         ((OR (< nlinha 0) (>= nlinha T-NLINHAS)) ()) ;(format t "Posicao invalida. Apenas [0, 17] linhas"))
         ((OR (< ncoluna 0) (>= ncoluna T-NCOLUNAS)) ()) ;(format t "Posicao invalida. Apenas [0, 9] colunas"))
@@ -105,9 +139,12 @@
 (defun tabuleiro-topo-preenchido-p (tabuleiro)
     ; devolve true se existir uma coluna preenchida
     ; na linha 17 do tabuleiro
-    (dotimes (col T-NCOLUNAS t)
-        (if (null (aref tabuleiro (1- T-NLINHAS) col)) (return nil))
+    ;ALTEREI PARA DEVOLVER T QUANDO ENCONTRA POSICAO PREENCHIDA E E DEVOLVER NIL CASO NAO ENCONTRE
+    
+    (dotimes (col T-NCOLUNAS nil)
+        (if (not (null (aref tabuleiro (1- T-NLINHAS) col))) (return T))
     )
+    
 )
 
 ;;; tabuleiros-iguais-p: tabuleiro x tabuleiro -> logico
@@ -149,12 +186,13 @@
     ; devolve novo objecto, nao destrutivo do antigo
     (make-estado
         :pontos (estado-pontos estado)
-        :pecas-por-colocar (estado-pecas-por-colocar estado)
-        :pecas-colocadas (estado-pecas-colocadas estado)
-        :tabuleiro (estado-tabuleiro estado)
+        :pecas-por-colocar (copy-list (estado-pecas-por-colocar estado))
+        :pecas-colocadas (copy-list (estado-pecas-colocadas estado))
+        ;:tabuleiro (copia-tabuleiro (estado-tabuleiro estado))
+        :tabuleiro (copy-array (estado-tabuleiro estado))
     )
+    ;(estado-copy estado)
 )
-
 
 ;;; estados-iguais-p: estado x estado -> logico
 (defun estados-iguais-p (estado1 estado2)
@@ -168,7 +206,8 @@
     ; (jogador nao pode fazer mais jogadas) (pecas por colocar zerop)
     ; false caso contrario
     ; tiver atingido o topo ou nao tiver mais pecas por colocar
-    (zerop (length (estado-pecas-por-colocar estado)))
+    (OR (zerop (length (estado-pecas-por-colocar estado)))  ; se nao tiver pecas por colocar
+        (tabuleiro-topo-preenchido-p (estado-tabuleiro estado)))  ; se tiver o topo preenchido
 )
 
 ;;;  creates type Problema
@@ -187,12 +226,13 @@
     ; solucao (true) se o topo nao tiver preenchido e se nao
     ; existirem pecas por colocar.
     ; (ter pontos nao interessa)
-    (declare (ignore estado))
+    (AND (zerop (length (estado-pecas-por-colocar estado)))  ; se nao tiver pecas por colocar
+        (not (tabuleiro-topo-preenchido-p (estado-tabuleiro estado))))
 )
 
 ;;; accoes: estado -> lista de acoes
 (defun accoes (estado)
-    ; recebe estado devove lista de accoes validas
+    ; recebe estado devolve lista de accoes validas
     ; acao valida mesmo que faca o jogador perder
     ; acao invalida se nao for fisicamente possivel (< 0 > 10)
     ; !! ordem e importante frente na lista deve estar a order
@@ -204,7 +244,7 @@
 ;;; resultado: estado x accao -> estado
 (defun resultado (estado accao)
     ; recebe estado e acao e devolve o novo estado que
-    ; resultda de aplica a cao ao estado original
+    ; resultda de aplica a acao ao estado original
     ; NAO e destrutivo, ou seja, novo obejcto e gerado
     ; pseudo algo:
     ; deve actualizar as listas de pecas,
@@ -221,7 +261,7 @@
     ; recebe estado e devolve inteiro que corresponde
     ; ao valor de pontos ganhos ate ao momento em valor negativo.
     ; **** LER COM MAIS ATENCAO ****
-    (declare (ignore estado))
+    (* -1 (estado-pontos estado))
 )
 
 ;;; custo-oportunidade: estado -> inteiro
