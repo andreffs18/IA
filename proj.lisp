@@ -56,10 +56,13 @@
     ; devolve a posicao mais alta que esteja preenchida
     ; da coluna em questao
     ; devolve zero caso nao esteja preenchida
+    ;METI altura iniciar a ZERO no let, para devolver 0 e nao nil quando a coluna nao tiver nenhuma peca
+
     (let ((altura 0))
-        (dotimes (lin T-NLINHAS altura)
-            (if (not (null (aref tabuleiro lin ncoluna)))
-                (setf altura (+ lin 1))
+        (dotimes (lin T-NLINHAS altura)  ; vou percorrer as linhas todas e returnar a altura
+            (if (not (null (aref tabuleiro lin ncoluna)))  ; se a current altura nao for nil
+                (setf altura (+ lin 1))  ; actualizo a var altura para a mais actual
+
             )
         )
     )
@@ -76,7 +79,7 @@
 )
 
 ;;; tabuleiro-preenche!: tabuleiro x inteiro x inteiro -> {}
-(defun tabuleiro-preenche! (tabuleiro ncoluna nlinha)
+(defun tabuleiro-preenche! (tabuleiro nlinha ncoluna)
     ; altera o tabuleiro recebido na pos nlinha ncoluna
     ; para ficar preenchido
     ; valida de os valores da nlinha e ncoluna sao validos
@@ -168,7 +171,6 @@
     )
 )
 
-
 ;;; estados-iguais-p: estado x estado -> logico
 (defun estados-iguais-p (estado1 estado2)
     ; devolve true se os 2 estados forem iguais
@@ -181,7 +183,8 @@
     ; (jogador nao pode fazer mais jogadas) (pecas por colocar zerop)
     ; false caso contrario
     ; tiver atingido o topo ou nao tiver mais pecas por colocar
-    (zerop (length (estado-pecas-por-colocar estado)))
+    (OR (zerop (length (estado-pecas-por-colocar estado)))  ; se nao tiver pecas por colocar
+        (tabuleiro-topo-preenchido-p (estado-tabuleiro estado)))  ; se tiver o topo preenchido
 )
 
 ;;;  creates type Problema
@@ -200,7 +203,7 @@
     ; solucao (true) se o topo nao tiver preenchido e se nao
     ; existirem pecas por colocar.
     ; (ter pontos nao interessa)
-    (declare (ignore estado))
+    (estado-final-p estado)
 )
 
 ;;; accoes: estado -> lista de acoes
@@ -217,7 +220,7 @@
 ;;; resultado: estado x accao -> estado
 (defun resultado (estado accao)
     ; recebe estado e acao e devolve o novo estado que
-    ; resultda de aplica a cao ao estado original
+    ; resultda de aplica a acao ao estado original
     ; NAO e destrutivo, ou seja, novo obejcto e gerado
     ; pseudo algo:
     ; deve actualizar as listas de pecas,
@@ -234,7 +237,7 @@
     ; recebe estado e devolve inteiro que corresponde
     ; ao valor de pontos ganhos ate ao momento em valor negativo.
     ; **** LER COM MAIS ATENCAO ****
-    (declare (ignore estado))
+    (* -1 (estado-pontos estado))
 )
 
 ;;; custo-oportunidade: estado -> inteiro
