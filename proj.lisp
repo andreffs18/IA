@@ -238,7 +238,26 @@ arguments."
     ; !! ordem e importante frente na lista deve estar a order
     ; com que a peca deve estar virada, (orientacao)
     ; **** LER COM MAIS ATENCAO ****
-    (declare (ignore estado))
+;     (let ((lista (list ())) (peca (first (estado-pecas-por-colocar estado))))
+;         (lambda 
+;         (cond 
+;             ((eq peca 'i) (
+;                     (dotimes (n (1- T-NCOLUNAS) T)
+;                         (setf lista (append (cria-accao n peca-i0)))
+;                     )
+;                     (dotimes (o (- T-NCOLUNAS 4) T)
+;                         (setf lista (append (cria-accao o peca-i1)))
+;                     )
+;                     (return lista)
+;                 )
+;             )
+
+
+;         )
+;         )
+
+;     )
+(declare (ignore estado))
 )
 
 ;;; resultado: estado x accao -> estado
