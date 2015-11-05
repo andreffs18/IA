@@ -76,12 +76,15 @@
 )
 
 ;;; tabuleiro-preenche!: tabuleiro x inteiro x inteiro -> {}
-(defun tabuleiro-preenche! (tabuleiro nlinha ncoluna)
+(defun tabuleiro-preenche! (tabuleiro ncoluna nlinha)
     ; altera o tabuleiro recebido na pos nlinha ncoluna
     ; para ficar preenchido
     ; valida de os valores da nlinha e ncoluna sao validos
     ; (se estao dentro dos limites do campo)
     ; nao interessa o valor devolvido (deve devolver nada)??
+    ;(if (AND (AND (>= nlinha 0) (< nlinha T-NLINHAS)) (AND (>= ncoluna 0) (< ncoluna T-NCOLUNAS))) (setf (aref tabuleiro nlinha ncoluna) T) )
+    ;TROQUEI AS VARIAVEIS NCOLUNA E NLINHA - O PROF CHAMA AO CONTRARIO
+
     (cond
         ((OR (< nlinha 0) (>= nlinha T-NLINHAS)) ()) ;(format t "Posicao invalida. Apenas [0, 17] linhas"))
         ((OR (< ncoluna 0) (>= ncoluna T-NCOLUNAS)) ()) ;(format t "Posicao invalida. Apenas [0, 9] colunas"))
@@ -112,9 +115,12 @@
 (defun tabuleiro-topo-preenchido-p (tabuleiro)
     ; devolve true se existir uma coluna preenchida
     ; na linha 17 do tabuleiro
-    (dotimes (col T-NCOLUNAS t)
-        (if (null (aref tabuleiro (1- T-NLINHAS) col)) (return nil))
+    ;ALTEREI PARA DEVOLVER T QUANDO ENCONTRA POSICAO PREENCHIDA E E DEVOLVER NIL CASO NAO ENCONTRE
+    
+    (dotimes (col T-NCOLUNAS nil)
+        (if (not (null (aref tabuleiro (1- T-NLINHAS) col))) (return T))
     )
+    
 )
 
 ;;; tabuleiros-iguais-p: tabuleiro x tabuleiro -> logico
