@@ -9,7 +9,7 @@
 
 ;;; cria-accao: inteiro x array -> accao
 (defun cria-accao (pos_esq config)
-    (setq accao (pos_esq (append 'config accao))
+    (make-accao :pos_esq pos :config config)
 )
 
 ;;; accao-coluna: accao-coluna: accao -> inteiro
