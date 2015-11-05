@@ -9,7 +9,14 @@
 
 ;;; cria-accao: inteiro x array -> accao
 (defun cria-accao (pos_esq config)
-    (setq accao (pos_esq (append 'config accao))
+    ;(setf accao (make-array 2))
+    ;(setf (aref accao 0) pos_esq)
+    ;(setf (aref accao 1) config)
+    (cons pos_esq config)
+
+    ;(make-accao :pos_esq pos :config config)
+    ;(make-array 2 :initial-contents '(pos_esq config))
+    ;(setq accao (pos_esq (append 'config accao))
 )
 
 ;;; accao-coluna: accao-coluna: accao -> inteiro
@@ -49,7 +56,7 @@
     ; devolve a posicao mais alta que esteja preenchida
     ; da coluna em questao
     ; devolve zero caso nao esteja preenchida
-    (let ((altura nil))
+    (let ((altura 0))
         (dotimes (lin T-NLINHAS altura)
             (if (not (null (aref tabuleiro lin ncoluna)))
                 (setf altura (+ lin 1))
