@@ -221,7 +221,7 @@
     ; recebe estado e devolve inteiro que corresponde
     ; ao valor de pontos ganhos ate ao momento em valor negativo.
     ; **** LER COM MAIS ATENCAO ****
-    (declare (ignore estado))
+    (* -1 (estado-pontos estado))
 )
 
 ;;; custo-oportunidade: estado -> inteiro
@@ -267,5 +267,5 @@ Algoritmos de Procura (2' parte do projecto)
     (declare (ignore array lista-pecas))
 )
 
-;(load "utils.fas")
-(load (compile-file "utils.lisp"))
+(load "utils.fas")
+;(load (compile-file "utils.lisp"))
