@@ -36,9 +36,30 @@
     (make-array (list T-NLINHAS T-NCOLUNAS) :initial-element nil)
 )
 
+;;; Aux function copy-arrays
+(defun copy-array (array &key
+                   (element-type (array-element-type array))
+                   (fill-pointer (and (array-has-fill-pointer-p array)
+                                      (fill-pointer array)))
+                   (adjustable (adjustable-array-p array)))
+  "Returns an undisplaced copy of ARRAY, with same fill-pointer and
+adjustability (if any) as the original, unless overridden by the keyword
+arguments."
+  (let* ((dimensions (array-dimensions array))
+         (new-array (make-array dimensions
+                                :element-type element-type
+                                :adjustable adjustable
+                                :fill-pointer fill-pointer)))
+    (dotimes (i (array-total-size array))
+      (setf (row-major-aref new-array i)
+            (row-major-aref array i)))
+    new-array))
+
 ;;; copia-tabuleiro: tabuleiro -> tabuleiro
 (defun copia-tabuleiro (tabuleiro)
     ;funcao para copiar o antigo tabuleiro para um novo
+
+    ;(copy-array(tabuleiro))
     (make-array (array-total-size tabuleiro)
                 :displaced-to tabuleiro
                 :element-type (array-element-type tabuleiro))
@@ -165,10 +186,12 @@
     ; devolve novo objecto, nao destrutivo do antigo
     (make-estado
         :pontos (estado-pontos estado)
-        :pecas-por-colocar (estado-pecas-por-colocar estado)
-        :pecas-colocadas (estado-pecas-colocadas estado)
-        :tabuleiro (estado-tabuleiro estado)
+        :pecas-por-colocar (copy-list (estado-pecas-por-colocar estado))
+        :pecas-colocadas (copy-list (estado-pecas-colocadas estado))
+        ;:tabuleiro (copia-tabuleiro (estado-tabuleiro estado))
+        :tabuleiro (copy-array (estado-tabuleiro estado))
     )
+    ;(estado-copy estado)
 )
 
 ;;; estados-iguais-p: estado x estado -> logico
@@ -203,12 +226,13 @@
     ; solucao (true) se o topo nao tiver preenchido e se nao
     ; existirem pecas por colocar.
     ; (ter pontos nao interessa)
-    (estado-final-p estado)
+    (AND (zerop (length (estado-pecas-por-colocar estado)))  ; se nao tiver pecas por colocar
+        (not (tabuleiro-topo-preenchido-p (estado-tabuleiro estado))))
 )
 
 ;;; accoes: estado -> lista de acoes
 (defun accoes (estado)
-    ; recebe estado devove lista de accoes validas
+    ; recebe estado devolve lista de accoes validas
     ; acao valida mesmo que faca o jogador perder
     ; acao invalida se nao for fisicamente possivel (< 0 > 10)
     ; !! ordem e importante frente na lista deve estar a order
