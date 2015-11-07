@@ -9,23 +9,19 @@
 
 ;;; cria-accao: inteiro x array -> accao
 (defun cria-accao (pos_esq config)
-    ;(setf accao (make-array 2))
-    ;(setf (aref accao 0) pos_esq)
-    ;(setf (aref accao 1) config)
+    ; cria par com (posicao da peca, configuracao da peca)
     (cons pos_esq config)
-
-    ;(make-accao :pos_esq pos :config config)
-    ;(make-array 2 :initial-contents '(pos_esq config))
-    ;(setq accao (pos_esq (append 'config accao))
 )
 
 ;;; accao-coluna: accao-coluna: accao -> inteiro
 (defun accao-coluna (accao)
+    ; mostra posicao da peca a contar da esquerda
     (car accao)
 )
 
 ;;; accao-peca: accao -> array
 (defun accao-peca(accao)
+    ; mostra configuracao da peca
     (cdr accao)
 )
 
@@ -38,13 +34,10 @@
 
 ;;; Aux function copy-arrays
 (defun copy-array (array &key
-                   (element-type (array-element-type array))
-                   (fill-pointer (and (array-has-fill-pointer-p array)
-                                      (fill-pointer array)))
-                   (adjustable (adjustable-array-p array)))
-  "Returns an undisplaced copy of ARRAY, with same fill-pointer and
-adjustability (if any) as the original, unless overridden by the keyword
-arguments."
+                    (element-type (array-element-type array))
+                    (fill-pointer (and (array-has-fill-pointer-p array)
+                                       (fill-pointer array)))
+                    (adjustable (adjustable-array-p array)))
   (let* ((dimensions (array-dimensions array))
          (new-array (make-array dimensions
                                 :element-type element-type
@@ -53,7 +46,8 @@ arguments."
     (dotimes (i (array-total-size array))
       (setf (row-major-aref new-array i)
             (row-major-aref array i)))
-    new-array))
+    new-array)
+)
 
 ;;; copia-tabuleiro: tabuleiro -> tabuleiro
 (defun copia-tabuleiro (tabuleiro)
@@ -89,7 +83,7 @@ arguments."
     )
 )
 
-;;; tabuleiro-linha-completa-p: tabuleiro x inteiro -> lgico
+;;; tabuleiro-linha-completa-p: tabuleiro x inteiro -> logico
 (defun tabuleiro-linha-completa-p (tabuleiro nlinha)
     ; devolve true se todas as posicoes da linha inteira
     ; estiverem preenchidas
@@ -107,8 +101,6 @@ arguments."
     ; (se estao dentro dos limites do campo)
     ; nao interessa o valor devolvido (deve devolver nada)??
     ;(if (AND (AND (>= nlinha 0) (< nlinha T-NLINHAS)) (AND (>= ncoluna 0) (< ncoluna T-NCOLUNAS))) (setf (aref tabuleiro nlinha ncoluna) T) )
-    ;TROQUEI AS VARIAVEIS NCOLUNA E NLINHA - O PROF CHAMA AO CONTRARIO
-
     (cond
         ((OR (< nlinha 0) (>= nlinha T-NLINHAS)) ()) ;(format t "Posicao invalida. Apenas [0, 17] linhas"))
         ((OR (< ncoluna 0) (>= ncoluna T-NCOLUNAS)) ()) ;(format t "Posicao invalida. Apenas [0, 9] colunas"))
@@ -140,7 +132,6 @@ arguments."
     ; devolve true se existir uma coluna preenchida
     ; na linha 17 do tabuleiro
     ; ALTEREI PARA DEVOLVER T QUANDO ENCONTRA POSICAO PREENCHIDA E E DEVOLVER NIL CASO NAO ENCONTRE
-
     (dotimes (col T-NCOLUNAS nil)
         (if (not (null (aref tabuleiro (1- T-NLINHAS) col))) (return T))
     )
@@ -184,11 +175,11 @@ arguments."
     ; devolve novo estado cujo conteudo sera copiado do arg
     ; devolve novo objecto, nao destrutivo do antigo
     (make-estado
-        :pontos (estado-pontos estado)
-        :pecas-por-colocar (copy-list (estado-pecas-por-colocar estado))
+        :pontos (estado-pontos estado)  ;BUG: e preciso fazer uma copia deste valor
+        :pecas-por-colocar (copy-list (estado-pecas-por-colocar estado)) ;usar o copy-list para nao alterar o estado original
         :pecas-colocadas (copy-list (estado-pecas-colocadas estado))
         ;:tabuleiro (copia-tabuleiro (estado-tabuleiro estado))
-        :tabuleiro (copy-array (estado-tabuleiro estado))
+        :tabuleiro (copy-array (estado-tabuleiro estado))   ;usar o copy-array para alterar estado inicial
     )
     ;(estado-copy estado)
 )
@@ -225,8 +216,8 @@ arguments."
     ; solucao (true) se o topo nao tiver preenchido e se nao
     ; existirem pecas por colocar.
     ; (ter pontos nao interessa)
-    (AND (zerop (length (estado-pecas-por-colocar estado)))  ; se nao tiver pecas por colocar
-        (not (tabuleiro-topo-preenchido-p (estado-tabuleiro estado))))
+    (AND (zerop (length (estado-pecas-por-colocar estado)))  ;se nao tiver pecas por colocar
+         (not (tabuleiro-topo-preenchido-p (estado-tabuleiro estado)))) ;se o topo nao estiver preenchido
 )
 
 ;;; accoes: estado -> lista de acoes
@@ -236,8 +227,16 @@ arguments."
     ; acao invalida se nao for fisicamente possivel (< 0 > 10)
     ; !! ordem e importante frente na lista deve estar a order
     ; com que a peca deve estar virada, (orientacao)
-    ; **** LER COM MAIS ATENCAO ****
-    (declare (ignore estado))
+    (cond
+        ((eq (first (estado-pecas-por-colocar estado)) 'i) (peca-i))
+        ((eq (first (estado-pecas-por-colocar estado)) 'l) (peca-l))
+        ((eq (first (estado-pecas-por-colocar estado)) 'j) (peca-j))
+        ((eq (first (estado-pecas-por-colocar estado)) 'o) (peca-o))
+        ((eq (first (estado-pecas-por-colocar estado)) 's) (peca-s))
+        ((eq (first (estado-pecas-por-colocar estado)) 'z) (peca-z))
+        ((eq (first (estado-pecas-por-colocar estado)) 't) (peca-t))
+        (T (nil))
+    )
 )
 
 ;;; resultado: estado x accao -> estado
@@ -247,12 +246,61 @@ arguments."
     ; NAO e destrutivo, ou seja, novo obejcto e gerado
     ; pseudo algo:
     ; deve actualizar as listas de pecas,
-    ; colocar a pea especificada pela aco na posio correcta
-    ; depois de colocada a pea,
-    ; verifica se o topo do tabuleiro est preenchido;
-    ; caso sim:no se removem linhas e devolve-se o estado
-    ; case no:removem-se as linhas e calculam-se os pontos obtidos
-    (declare (ignore estado accao))
+    ; colocar a peca especificada pela accao na posicao correcta
+    ; depois de colocada a peca,
+    ; verifica se o topo do tabuleiro esta preenchido;
+    ; caso sim: nao se removem linhas e devolve-se o estado
+    ; case no: removem-se as linhas e calculam-se os pontos obtidos
+    (let (
+        (new (copia-estado estado))
+        (numlinhaspeca (first (array-dimensions (cdr accao))))
+        (numcolunaspeca (second (array-dimensions (cdr accao))))
+        (colunamaior 0)
+        (nlinhasremovidas 0)
+        )
+
+        ;CICLO DESCOBRIR COLUNA MAIOR DO TABULEIRO (ONDE A PECA PUDERA COLIDIR)
+        (dotimes (c numcolunaspeca)
+            (if (> (tabuleiro-altura-coluna (estado-tabuleiro new) (+ c (car accao))) colunamaior) ( ;verifica qual das colunas do tabuleiro que estao por baixo da peca e maior
+                setf colunamaior (tabuleiro-altura-coluna (estado-tabuleiro new) (+ c (car accao)))))
+        )
+
+        ;CICLO DE DECREMENTO DAS POSICOES DA PECA NA TABELA ATE COLISAO
+        (loop for lin from colunamaior downto 0
+            do (
+                (lambda ()
+                (if (detecta-colisao accao (estado-tabuleiro new) lin) ( ;detecta se houve colisao da peca com o tabuleiro
+                    insere-peca (cdr accao) (estado-tabuleiro new) (1- lin) (car accao) numlinhaspeca numcolunaspeca)) ;caso existe colisao, metemos a peca na LINHA ANTERIOR
+                )
+            )
+        )
+
+        ;ACTUALIZAR A LISTA DE PECAS COLOCADAS PELA LISTA DE PECAS POR COLOCAR
+        (setf (estado-pecas-colocadas new) (append (estado-pecas-colocadas new) (list (first (estado-pecas-por-colocar new)))))
+
+        ;ACTUALIZAR A LISTA DE PECAS POR COLOCAR (RETIRANDO O PRIMEIRO ELEMENTO DA LISTA)
+        (setf (estado-pecas-por-colocar new) (rest (estado-pecas-por-colocar new)))
+
+        ;VERIFICA SE ACABOU O JOGO (TOPO PREENCHIDO)
+        (if (tabuleiro-topo-preenchido-p (estado-tabuleiro new))
+            ;Se true:
+            (return new) ;devolve o estado
+            ;Se nil:
+            (dotimes (l T-NLINHAS)
+                (lambda
+                (if (tabuleiro-linha-completa-p (estado-tabuleiro new) l) (
+                (tabuleiro-remove-linha! l) ;remover as linhas (BUG: nao e bug mas podemos arranjar forma de nao procurar o tabuleiro todo por uma linha preenchida)
+                (setf nlinhasremovidas (1+ nlinhasremovidas)))) ; incrementa contador de linhas removidas
+                )
+            )
+            (cond  ;atribuicao da respectiva pontuacao consoante o numero de linhas removidas
+                ((eq nlinhasremovidas 1) (setf (estado-pontos new) (+ (estado-pontos new) 100)))
+                ((eq nlinhasremovidas 2) (setf (estado-pontos new) (+ (estado-pontos new) 300)))
+                ((eq nlinhasremovidas 3) (setf (estado-pontos new) (+ (estado-pontos new) 500)))
+                ((eq nlinhasremovidas 4) (setf (estado-pontos new) (+ (estado-pontos new) 800)))
+            )
+        )
+    )
 )
 
 ;;; qualidade: estado -> inteiro
@@ -271,6 +319,215 @@ arguments."
     (declare (ignore estado))
 )
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; AUX FUNCTIONS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; peca-i: {} -> lista de accoes
+(defun peca-i ()
+    ; devolve uma lista de accoes correspondentes a peca i
+    ; cria uma lista vazia e vai adicionando accoes com as colunas
+    ; possiveis para esta peca especifica e com a sua configuracao
+    (let (lista (list ()))
+        (dotimes (n T-NCOLUNAS)
+            (setf lista (append lista (list (cria-accao n peca-i0))))
+        )
+        (dotimes (n (- T-NCOLUNAS 3) (rest lista))
+            (setf lista (append lista (list (cria-accao n peca-i1))))
+        )
+    )
+)
+
+;;; peca-l: {} -> lista de accoes
+(defun peca-l ()
+    ; devolve uma lista de accoes correspondentes a peca l
+    ; cria uma lista vazia e vai adicionando accoes com as colunas
+    ; possiveis para esta peca especifica e com a sua configuracao
+    ; A escolha da orientacao comecar em l0 e passar para l3, l2 e l1,
+    ; esta descrito no enunciado que a lista deve comecar pela orientacao inicial da peca
+    ; e ir alterando a orientacao rodando a peca 90 graus no sentido horario,
+    ; passando para l3 -> l2 -> l1
+    (let (lista (list ()))
+        (dotimes (n (1- T-NCOLUNAS))
+           (setf lista (append lista (list (cria-accao n peca-l0))))
+        )
+        (dotimes (n (- T-NCOLUNAS 2))
+           (setf lista (append lista (list (cria-accao n peca-l3))))
+        )
+        (dotimes (n (1- T-NCOLUNAS))
+           (setf lista (append lista (list (cria-accao n peca-l2))))
+        )
+        (dotimes (n (- T-NCOLUNAS 2) (rest lista))
+           (setf lista (append lista (list (cria-accao n peca-l1))))
+        )
+    )
+)
+
+;;; peca-j: {} -> lista de accoes
+(defun peca-j ()
+    ; devolve uma lista de accoes correspondentes a peca j
+    ; cria uma lista vazia e vai adicionando accoes com as colunas
+    ; possiveis para esta peca especifica e com a sua configuracao
+    ; A escolha da orientacao comecar em j0 e passar para j3, j2 e j1,
+    ; esta descrito no enunciado que a lista deve comecar pela orientacao inicial da peca
+    ; e ir alterando a orientacao rodando a peca 90 graus no sentido horario,
+    ; passando para j3 -> j2 -> j1
+    (let (lista '())
+        (dotimes (n (1- T-NCOLUNAS))
+           (setf lista (append lista (list (cria-accao n peca-j0))))
+        )
+        (dotimes (n (- T-NCOLUNAS 2))
+           (setf lista (append lista (list (cria-accao n peca-j3))))
+        )
+        (dotimes (n (1- T-NCOLUNAS))
+           (setf lista (append lista (list (cria-accao n peca-j2))))
+        )
+        (dotimes (n (- T-NCOLUNAS 2) lista)
+           (setf lista (append lista (list (cria-accao n peca-j1))))
+        )
+    )
+)
+
+;;; peca-o: {} -> lista de accoes
+(defun peca-o ()
+    ; devolve uma lista de accoes correspondentes a peca o
+    ; cria uma lista vazia e vai adicionando accoes com as colunas
+    ; possiveis para esta peca especifica e com a sua configuracao
+    (let (lista '())
+        (dotimes (n (1- T-NCOLUNAS) lista)
+            (setf lista (append lista (list (cria-accao n peca-o0))))
+        )
+    )
+)
+
+;;; peca-s: {} -> lista de accoes
+(defun peca-s ()
+    ; devolve uma lista de accoes correspondentes a peca s
+    ; cria uma lista vazia e vai adicionando accoes com as colunas
+    ; possiveis para esta peca especifica e com a sua configuracao
+    (let (lista '())
+        (dotimes (n (- T-NCOLUNAS 2))
+            (setf lista (append lista (list (cria-accao n peca-s0))))
+        )
+        (dotimes (n (1- T-NCOLUNAS) lista)
+            (setf lista (append lista (list (cria-accao n peca-s1))))
+        )
+    )
+)
+
+;;; peca-z: {} -> lista de accoes
+(defun peca-z ()
+    ; devolve uma lista de accoes correspondentes a peca z
+    ; cria uma lista vazia e vai adicionando accoes com as colunas
+    ; possiveis para esta peca especifica e com a sua configuracao
+    (let (lista '())
+        (dotimes (n (- T-NCOLUNAS 2))
+            (setf lista (append lista (list (cria-accao n peca-z0))))
+        )
+        (dotimes (n (1- T-NCOLUNAS) lista)
+            (setf lista (append lista (list (cria-accao n peca-z1))))
+        )
+    )
+)
+
+;;; peca-t: {} -> lista de accoes
+(defun peca-t ()
+    ; devolve uma lista de accoes correspondentes a peca t
+    ; cria uma lista vazia e vai adicionando accoes com as colunas
+    ; possiveis para esta peca especifica e com a sua configuracao
+    ; A escolha da orientacao comecar em t0 e passar para t3, t2 e t1,
+    ; esta descrito no enunciado que a lista deve comecar pela orientacao inicial da peca
+    ; e ir alterando a orientacao rodando a peca 90 graus no sentido horario,
+    ; passando para t3 -> t2 -> t1
+    (let (lista '())
+        (dotimes (n (- T-NCOLUNAS 2))
+           (setf lista (append lista (list (cria-accao n peca-t0))))
+        )
+        (dotimes (n (1- T-NCOLUNAS))
+           (setf lista (append lista (list (cria-accao n peca-t3))))
+        )
+        (dotimes (n (- T-NCOLUNAS 2))
+           (setf lista (append lista (list (cria-accao n peca-t2))))
+        )
+        (dotimes (n (1- T-NCOLUNAS) lista)
+           (setf lista (append lista (list (cria-accao n peca-t1))))
+        )
+    )
+)
+
+;;; dentro-limites: nlinha x ncoluna -> logico
+(defun dentro-limites (nlinha ncoluna)
+    ; recebe numero de linha e coluna
+    ; devolve True se posicao dentro dos limites
+    ; limite das linhas [0, 17]
+    ; limite das colunas [0, 9]
+    ;ESTAA A FUNCIONAR
+
+    (if
+        ;se dentro dos limites
+        (AND
+            (AND
+                (>= nlinha 0)
+                (< nlinha T-NLINHAS)
+            )
+            (AND
+                (>= ncoluna 0)
+                (< ncoluna T-NCOLUNAS)
+            )
+        )
+        ;devolve
+        T
+        ;caso contrario devolve
+        nil
+    )
+)
+
+;;; detecta-colisao: accao x tabuleiro -> logico
+(defun detecta-colisao (accao tabuleiro nlinha)
+    ; recebe accao, estado e numero da linha
+    ; devolve
+    ; true caso a peca esteja a coincidir com alguma posicao do tabuleiro(True)
+    ; false caso a peca nao coincida com nenhuma posicao preenchida do tabuleiro
+    (let (
+        (numcolunaspeca (first (array-dimensions (cdr accao))))
+        (numlinhaspeca (second (array-dimensions (cdr accao))))
+        )
+
+        ;BUG: ha problema nestes ciclos...
+        (dotimes (l numlinhaspeca)
+            (loop for c from 0 to numcolunaspeca do (
+                (lambda ()
+                (print l)
+                (print numlinhaspeca)
+                (if (dentro-limites (+ nlinha l) (+ (car accao) c)) ( ;verifica se a posicao que se ira comparar esta dentro dos limites do tabuleiro
+                    ;verifica se alguma posicao da peca (a True) coincide com alguma posicao do tabuleiro (a True)
+                    if (AND (tabuleiro-preenchido-p (cdr accao) l c) (tabuleiro-preenchido-p tabuleiro (+ nlinha l) (+ (car accao) c))) T)
+                )
+                )
+            ))
+        )
+    )
+)
+;linha de teste no terminal e funciona
+;(if (AND (tabuleiro-preenchido-p (cdr acc) 0 0) (tabuleiro-preenchido-p (estado-tabuleiro estado1) (+ 5 0) (+ (car acc) 0))) T)
+
+;;; insere-peca: peca x tabuleiro x nlinha x ncoluna -> {}
+(defun insere-peca (peca tabuleiro nlinha ncoluna numlinhaspeca numcolunaspeca)
+    ; recebe linha e coluna a partir das quais se insere a peca no tabuleiro
+    ; nao devolve nada
+    (let ()
+
+        (dotimes (l numlinhaspeca)
+            (dotimes (c numcolunaspeca)
+                (lambda
+                (if (tabuleiro-preenchido-p peca l c) (    ;verifica se a posicao na peca e true (se for nil nao faz sentido inserir)
+                    (if (dentro-limites (+ nlinha l) (+ ncoluna c)) ( ;validar se a nova posicao a inserir no tabuleiro esta dentro dos limites
+                        tabuleiro-preenche! tabuleiro (+ nlinha l) (+ ncoluna c)))) ;ibserir nova posicao no tabuleiro
+                )
+                )
+            )
+        )
+    )
+)
 
 #|
 Algoritmos de Procura (2' parte do projecto)
@@ -306,5 +563,5 @@ Algoritmos de Procura (2' parte do projecto)
     (declare (ignore array lista-pecas))
 )
 
-(load "utils.fas")
-;(load (compile-file "utils.lisp"))
+;(load "utils.fas")
+(load (compile-file "utils.lisp"))
