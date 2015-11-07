@@ -387,16 +387,26 @@ arguments."
     ; devolve True se posicao dentro dos limites
     ; limite das linhas [0, 17]
     ; limite das colunas [0, 9]
-    (AND 
-        (AND
-            (>= nlinha 0)
-            (< nlinha T-NLINHAS)
+    ;ESTAA A FUNCIONAR
+
+    (if
+        ;se dentro dos limites
+        (AND 
+            (AND
+                (>= nlinha 0)
+                (< nlinha T-NLINHAS)
+            )
+            (AND
+                (>= ncoluna 0)
+                (< ncoluna T-NCOLUNAS)
+            )
         )
-        (AND
-            (>= ncoluna 0)
-            (< ncoluna T-NCOLUNAS)
-        )
+        ;devolve
+        T
+        ;caso contrario devolve
+        nil
     )
+        
 )
 
 ;;; detecta-colisao: accao x tabuleiro -> logico
@@ -406,31 +416,33 @@ arguments."
     ; true caso a peca esteja a coincidir com alguma posicao do tabuleiro(True)
     ; false caso a peca nao coincida com nenhuma posicao preenchida do tabuleiro
     (let (
-        (numlinhaspeca (first (array-dimensions (cdr accao)))) 
-        (numcolunaspeca (last (array-dimensions (cdr accao))))
+        (numcolunaspeca (first (array-dimensions (cdr accao)))) 
+        (numlinhaspeca (second (array-dimensions (cdr accao))))
         )
         
+        ;BUG: ha problema nestes ciclos...
         (dotimes (l numlinhaspeca)
-            (dotimes (c numcolunaspeca)
-                (lambda
-                (if (dentro-limites (+ nlinha l) (+ ncoluna c)) ( ;verifica se a posicao que se ira comparar esta dentro dos limites do tabuleiro
+            (loop for c from 0 to numcolunaspeca do (
+                (lambda ()
+                (print l)
+                (print numlinhaspeca)
+                (if (dentro-limites (+ nlinha l) (+ (car accao) c)) ( ;verifica se a posicao que se ira comparar esta dentro dos limites do tabuleiro
                     ;verifica se alguma posicao da peca (a True) coincide com alguma posicao do tabuleiro (a True)
-                    (if (AND (tabuleiro-preenchido-p (cdr accao) l c) (tabuleiro-preenchido-p tabuleiro (+ nlinha l) (+ (car accao) c))) T))
+                    if (AND (tabuleiro-preenchido-p (cdr accao) l c) (tabuleiro-preenchido-p tabuleiro (+ nlinha l) (+ (car accao) c))) T)
                 )
                 )
-            )
+            ))
         )
     )
 )
+;linha de teste no terminal e funciona
+;(if (AND (tabuleiro-preenchido-p (cdr acc) 0 0) (tabuleiro-preenchido-p (estado-tabuleiro estado1) (+ 5 0) (+ (car acc) 0))) T)
 
 ;;; insere-peca: peca x tabuleiro x nlinha x ncoluna -> {}
-(defun insere-peca (peca tabuleiro nlinha ncoluna)
+(defun insere-peca (peca tabuleiro nlinha ncoluna numlinhaspeca numcolunaspeca)
     ; recebe linha e coluna a partir das quais se insere a peca no tabuleiro
     ; nao devolve nada
-    (let (
-        (numlinhaspeca (first (array-dimensions (cdr accao)))) ;numero de linhas da peca
-        (numcolunaspeca (last (array-dimensions (cdr accao)))) ;numero de colunas da peca
-        )
+    (let ()
         
         (dotimes (l numlinhaspeca)
             (dotimes (c numcolunaspeca)
@@ -460,23 +472,23 @@ arguments."
     (let (
         (new (copia-estado estado))   
         (numlinhaspeca (first (array-dimensions (cdr accao)))) 
-        (numcolunaspeca (last (array-dimensions (cdr accao)))) 
+        (numcolunaspeca (second (array-dimensions (cdr accao)))) 
         (colunamaior 0)
         (nlinhasremovidas 0)
         )
 
         ;CICLO DESCOBRIR COLUNA MAIOR DO TABULEIRO (ONDE A PECA PUDERA COLIDIR)
         (dotimes (c numcolunaspeca)
-            (if (> (tabuleiro-altura-coluna (estado-tabuleiro new) c) colunamaior) (
-                setf colunamaior (tabuleiro-altura-coluna (estado-tabuleiro new) c)))
+            (if (> (tabuleiro-altura-coluna (estado-tabuleiro new) (+ c (car accao))) colunamaior) ( ;verifica qual das colunas do tabuleiro que estao por baixo da peca e maior
+                setf colunamaior (tabuleiro-altura-coluna (estado-tabuleiro new) (+ c (car accao)))))
         )
 
         ;CICLO DE DECREMENTO DAS POSICOES DA PECA NA TABELA ATE COLISAO
         (loop for lin from colunamaior downto 0
             do (
-                (lambda             
+                (lambda ()            
                 (if (detecta-colisao accao (estado-tabuleiro new) lin) ( ;detecta se houve colisao da peca com o tabuleiro
-                    insere-peca (cdr accao) (estado-tabuleiro new) (1- lin) (car accao))) ;caso existe colisao, metemos a peca na LINHA ANTERIOR
+                    insere-peca (cdr accao) (estado-tabuleiro new) (1- lin) (car accao) numlinhaspeca numcolunaspeca)) ;caso existe colisao, metemos a peca na LINHA ANTERIOR
                 )
             )
         )
@@ -506,13 +518,7 @@ arguments."
                 ((eq nlinhasremovidas 4) (setf (estado-pontos new) (+ (estado-pontos new) 800)))
             )
         )
-
-
-
-
-       ;(setf (estado-pontos new) 10)
     )
-    ;(declare (ignore estado accao))
 )
 
 ;;; qualidade: estado -> inteiro
