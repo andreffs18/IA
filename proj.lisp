@@ -77,8 +77,8 @@ arguments."
     ; devolve a posicao mais alta que esteja preenchida
     ; da coluna em questao
     ; devolve zero caso nao esteja preenchida
-    ;METI altura iniciar a ZERO no let, para devolver 0 e nao nil quando a coluna nao tiver nenhuma peca
-
+    ; altura iniciar a ZERO no let, para devolver 0 e nao nil
+    ; quando a coluna nao tiver nenhuma peca
     (let ((altura 0))
         (dotimes (lin T-NLINHAS altura)  ; vou percorrer as linhas todas e returnar a altura
             (if (not (null (aref tabuleiro lin ncoluna)))  ; se a current altura nao for nil
@@ -139,12 +139,11 @@ arguments."
 (defun tabuleiro-topo-preenchido-p (tabuleiro)
     ; devolve true se existir uma coluna preenchida
     ; na linha 17 do tabuleiro
-    ;ALTEREI PARA DEVOLVER T QUANDO ENCONTRA POSICAO PREENCHIDA E E DEVOLVER NIL CASO NAO ENCONTRE
-    
+    ; ALTEREI PARA DEVOLVER T QUANDO ENCONTRA POSICAO PREENCHIDA E E DEVOLVER NIL CASO NAO ENCONTRE
+
     (dotimes (col T-NCOLUNAS nil)
         (if (not (null (aref tabuleiro (1- T-NLINHAS) col))) (return T))
     )
-    
 )
 
 ;;; tabuleiros-iguais-p: tabuleiro x tabuleiro -> logico
