@@ -53,9 +53,6 @@
 (defun copia-tabuleiro (tabuleiro)
     ;funcao para copiar o antigo tabuleiro para um novo
     (copy-array tabuleiro)
-    ;(make-array (array-total-size tabuleiro)
-    ;           :displaced-to tabuleiro
-    ;            :element-type (array-element-type tabuleiro))
 )
 
 ;;; tabuleiro-preenchido-p: tabuleiro x inteiro x inteiro -> logico
@@ -189,7 +186,6 @@
         :pecas-por-colocar (copy-list (estado-pecas-por-colocar estado)) ;usar o copy-list para nao alterar o estado original
         :pecas-colocadas (copy-list (estado-pecas-colocadas estado))
         :tabuleiro (copia-tabuleiro (estado-tabuleiro estado))
-        ; :tabuleiro (copy-array (estado-tabuleiro estado))   ;usar o copy-array para alterar estado inicial
     )
     ;(estado-copy estado)
 )
@@ -236,18 +232,18 @@
 ;     (1 . #2A((T) (T) (T) (T)))
 ;     (2 . #2A((T) (T) (T) (T)))
 ;     (3 . #2A((T) (T) (T) (T)))
-;     (4 . #2A((T) (T) (T) (T)))
-;     (5 . #2A((T) (T) (T) (T)))
-;     (6 . #2A((T) (T) (T) (T)))
-;     (7 . #2A((T) (T) (T) (T)))
+;     (4 . #2A((T) (T) (T) (T)))  ;
+;     (5 . #2A((T) (T) (T) (T)))  ;
+;     (6 . #2A((T) (T) (T) (T)))  ;
+;     (7 . #2A((T) (T) (T) (T)))  ;
 ;     (8 . #2A((T) (T) (T) (T)))
 ;     (9 . #2A((T) (T) (T) (T)))
 ;     (0 . #2A((T T T T)))
 ;     (1 . #2A((T T T T)))
-;     (2 . #2A((T T T T)))
-;     (3 . #2A((T T T T)))
-;     (4 . #2A((T T T T)))
-;     (5 . #2A((T T T T)))
+;     (2 . #2A((T T T T))) ;
+;     (3 . #2A((T T T T))) ;
+;     (4 . #2A((T T T T))) ;
+;     (5 . #2A((T T T T))) ;
 ;     (6 . #2A((T T T T)))
 ; )
 (defun peca-i ()
@@ -530,7 +526,6 @@
         (dotimes (n (1- T-NCOLUNAS))
            (setf lista (append lista (list (cria-accao n peca-t1))))
         )
-
         (dotimes (n (- T-NCOLUNAS 2))
            (setf lista (append lista (list (cria-accao n peca-t2))))
         )
@@ -540,8 +535,6 @@
 
     )
 )
-
-
 
 ;;; accoes: estado -> lista de acoes
 (defun accoes (estado)
@@ -614,7 +607,11 @@
          )
         (dotimes (l numlinhaspeca)
             (dotimes (c numcolunaspeca)
-                (tabuleiro-preenche! tabuleiro (+ nlinha l) (+ ncoluna c))
+                (setf lin (+ nlinha l))
+                (setf col (+ ncoluna c))
+                (if (aref peca lin col)
+                    (tabuleiro-preenche! tabuleiro lin col)
+                )
             )
         )
     )
