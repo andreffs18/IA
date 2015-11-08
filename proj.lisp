@@ -748,5 +748,5 @@ Algoritmos de Procura (2' parte do projecto)
     (declare (ignore array lista-pecas))
 )
 
-(load "utils.fas")
-;(load (compile-file "utils.lisp"))
+;(load "utils.fas")
+(load (compile-file "utils.lisp"))
