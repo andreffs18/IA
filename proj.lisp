@@ -604,6 +604,9 @@
     (let (
             (numlinhaspeca (first (array-dimensions peca)))
             (numcolunaspeca (second (array-dimensions peca)))
+
+            (lin 0)
+            (col 0)
          )
         (dotimes (l numlinhaspeca)
             (dotimes (c numcolunaspeca)
