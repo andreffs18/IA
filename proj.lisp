@@ -140,7 +140,7 @@
     ; na linha 17 do tabuleiro
     ; ALTEREI PARA DEVOLVER T QUANDO ENCONTRA POSICAO PREENCHIDA E E DEVOLVER NIL CASO NAO ENCONTRE
     (dotimes (col T-NCOLUNAS nil)
-        (format t "(aref tabuleiro (1- T-NLINHAS) col) = ~d ~%" (aref tabuleiro (1- T-NLINHAS) col))
+        ;(format t "(aref tabuleiro (1- T-NLINHAS) col) = ~d ~%" (aref tabuleiro (1- T-NLINHAS) col))
         (if (aref tabuleiro (1- T-NLINHAS) col) (return t))
     )
 )
@@ -655,7 +655,7 @@
                 (setf colunamaior alturacoluna)
             )
         )
-
+        ; ERROR !!!!
         ;CICLO DE DECREMENTO DAS POSICOES DA PECA NA TABELA ATE COLISAO
         (loop for linha from colunamaior downto 0
             do (
@@ -674,9 +674,9 @@
         (setf (estado-pecas-por-colocar new) (rest (estado-pecas-por-colocar new)))
 
         ;VERIFICA SE ACABOU O JOGO (TOPO PREENCHIDO)
-        (format t "(estado-pecas-por-colocar new) = ~d ~%" (estado-pecas-por-colocar new))
-        (format t "(estado-pecas-colocadas new) = ~d ~%" (estado-pecas-colocadas new))
-        (format t "(tabuleiro-topo-preenchido-p tabuleiro) = ~d ~%" (tabuleiro-topo-preenchido-p tabuleiro))
+        ;(format t "(estado-pecas-por-colocar new) = ~d ~%" (estado-pecas-por-colocar new))
+        ;(format t "(estado-pecas-colocadas new) = ~d ~%" (estado-pecas-colocadas new))
+        ;(format t "(tabuleiro-topo-preenchido-p tabuleiro) = ~d ~%" (tabuleiro-topo-preenchido-p tabuleiro))
         (if (tabuleiro-topo-preenchido-p tabuleiro)
             (return-from resultado new) ;Se true: devolve o estado
             (progn ;Se nil: remove linhas e calc pontos calc pontos
@@ -707,7 +707,7 @@
 ;;; Teste 14
 ;;; Testes fn resultado
 ;;deve retornar IGNORE
-(ignore-value (setf estado1 (make-estado :pontos 50 :pecas-por-colocar '(i j) :pecas-colocadas '(z z z) :tabuleiro (cria-tabuleiro))))
+;; (ignore-value )
 
 ;;; qualidade: estado -> inteiro
 (defun qualidade (estado)
@@ -721,8 +721,34 @@
 (defun custo-oportunidade (estado)
     ; recebe estado e devolve inteiro que corresponde
     ; nao percebo
-    ; **** LER COM MAIS ATENCAO ****
-    (declare (ignore estado))
+    (let (
+            (efectivament-conseguido (estado-pontos estado))
+            (maximo-possivel 0)
+            (todas-pecas (estado-pecas-colocadas estado))
+            (custos (make-array (list 7) :initial-element 0))  ; each position corresponds to a letter
+        )
+        ; acumular todos os custos de todas as acoes ja feitas ate a data
+        (dolist (peca todas-pecas)
+            ; (format t "peca=~d ~%" peca)
+            (cond  ;atribuicao da respectiva pontuacao consoante o numero de linhas removidas
+                ((eq peca 'i) (setf (aref custos 0) (+ 800 (aref custos 0))))
+                ((eq peca 'j) (setf (aref custos 1) (+ 500 (aref custos 1))))
+                ((eq peca 'l) (setf (aref custos 2) (+ 500 (aref custos 2))))
+                ((eq peca 's) (setf (aref custos 3) (+ 300 (aref custos 3))))
+                ((eq peca 'z) (setf (aref custos 4) (+ 300 (aref custos 4))))
+                ((eq peca 't) (setf (aref custos 5) (+ 300 (aref custos 5))))
+                ((eq peca 'o) (setf (aref custos 6) (+ 300 (aref custos 6))))
+                (t 0)
+            )
+        )
+        ; (format t "custos=~d ~%" custos)
+        ; descobrir o maior custo
+        (setf maximo-possivel (reduce #'max custos))
+        ; (format t "maximo-possivel=~d ~%" maximo-possivel)
+        ; (format t "efectivament-conseguido=~d ~%" efectivament-conseguido)
+        ; return difference
+        (return-from custo-oportunidade (- maximo-possivel efectivament-conseguido))
+    )
 )
 
 
