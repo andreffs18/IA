@@ -140,7 +140,8 @@
     ; na linha 17 do tabuleiro
     ; ALTEREI PARA DEVOLVER T QUANDO ENCONTRA POSICAO PREENCHIDA E E DEVOLVER NIL CASO NAO ENCONTRE
     (dotimes (col T-NCOLUNAS nil)
-        (if (not (null (aref tabuleiro (1- T-NLINHAS) col))) (return T))
+        (format t "(aref tabuleiro (1- T-NLINHAS) col) = ~d ~%" (aref tabuleiro (1- T-NLINHAS) col))
+        (if (aref tabuleiro (1- T-NLINHAS) col) (return t))
     )
 )
 
@@ -667,12 +668,15 @@
         )
 
         ;ACTUALIZAR A LISTA DE PECAS COLOCADAS PELA LISTA DE PECAS POR COLOCAR
-        (setf (estado-pecas-colocadas new) (append (estado-pecas-colocadas new) (list (first (estado-pecas-por-colocar new)))))
+        (setf (estado-pecas-colocadas new) (append (list (first (estado-pecas-por-colocar new))) (estado-pecas-colocadas new)))
 
         ;ACTUALIZAR A LISTA DE PECAS POR COLOCAR (RETIRANDO O PRIMEIRO ELEMENTO DA LISTA)
         (setf (estado-pecas-por-colocar new) (rest (estado-pecas-por-colocar new)))
 
         ;VERIFICA SE ACABOU O JOGO (TOPO PREENCHIDO)
+        (format t "(estado-pecas-por-colocar new) = ~d ~%" (estado-pecas-por-colocar new))
+        (format t "(estado-pecas-colocadas new) = ~d ~%" (estado-pecas-colocadas new))
+        (format t "(tabuleiro-topo-preenchido-p tabuleiro) = ~d ~%" (tabuleiro-topo-preenchido-p tabuleiro))
         (if (tabuleiro-topo-preenchido-p tabuleiro)
             (return-from resultado new) ;Se true: devolve o estado
             (progn ;Se nil: remove linhas e calc pontos calc pontos
@@ -699,6 +703,11 @@
         )
     )
 )
+
+;;; Teste 14
+;;; Testes fn resultado
+;;deve retornar IGNORE
+(ignore-value (setf estado1 (make-estado :pontos 50 :pecas-por-colocar '(i j) :pecas-colocadas '(z z z) :tabuleiro (cria-tabuleiro))))
 
 ;;; qualidade: estado -> inteiro
 (defun qualidade (estado)
