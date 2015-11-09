@@ -613,7 +613,7 @@
             (dotimes (c numcolunaspeca)
                 (setf lin (+ nlinha l))
                 (setf col (+ ncoluna c))
-                (if (aref peca lin col)
+                (if (aref peca l c) ;NAO e lin e col mas sim l e c porque lin e col percorrem o tabuleiro e neste if percorre-se a peca
                     (tabuleiro-preenche! tabuleiro lin col)
                 )
             )
@@ -658,12 +658,11 @@
         ; ERROR !!!!
         ;CICLO DE DECREMENTO DAS POSICOES DA PECA NA TABELA ATE COLISAO
         (loop for linha from colunamaior downto 0
-            do (
-                ;detecta se houve colisao da peca com o tabuleiro
-                if (detecta-colisao tabuleiro linha accao)
-                    ;caso existe colisao, metemos a peca na LINHA ANTERIOR
-                    (insere-peca tabuleiro peca (1- linha) coluna)
-
+            do (cond
+                ;Se nao detectar nenhuma colisao e estiver no fundo do tabuleiro (a peca) -> coloca-a nessa posicao
+                ((AND (not (detecta-colisao tabuleiro linha accao)) (eq linha 0)) (insere-peca tabuleiro peca linha coluna)) ;ESTAVA AQUI O BUG TESTE 15
+                ;Se detectar uma colisao -> coloca a peca na posicao anterior
+                ((detecta-colisao tabuleiro linha accao) (insere-peca tabuleiro peca (1+ linha) coluna))
             )
         )
 
@@ -680,18 +679,29 @@
         (if (tabuleiro-topo-preenchido-p tabuleiro)
             (return-from resultado new) ;Se true: devolve o estado
             (progn ;Se nil: remove linhas e calc pontos calc pontos
-                (dotimes (l T-NLINHAS)
+                (dotimes (l (1- T-NLINHAS)) 
                     (cond
                         (
                             (tabuleiro-linha-completa-p tabuleiro l)
+                            (progn 
                             ;remover as linhas (podemos arranjar forma de nao procurar o tabuleiro todo por uma linha preenchida)
                             (tabuleiro-remove-linha! tabuleiro l)
                             ; incrementa contador de linhas removidas
                             (setf nlinhasremovidas (1+ nlinhasremovidas))
+                            ;decrementa o contador porque quando se remove uma linha as outras descem,
+                            ;o que provoca um bug se duas linhas completas estiverem juntas.
+                            ;exemplo: na linha 0 e na 1 existem linhas completas,
+                            ;l=0 -> remove linha -> linhas descem -> a linha 1 que estava completa passa para a linha 0
+                            ;contador incrementa -> l=1 -> nao existe...
+                            ;LOGO cada vez que se remove uma linha, decrementa-se para apanhar esse caso
+                            (setf l (1- l))
+                            )
+                                
                         )
                         (t ())
                     )
                 )
+
                 (cond  ;atribuicao da respectiva pontuacao consoante o numero de linhas removidas
                     ((eq nlinhasremovidas 1) (setf (estado-pontos new) (+ (estado-pontos new) 100)))
                     ((eq nlinhasremovidas 2) (setf (estado-pontos new) (+ (estado-pontos new) 300)))
@@ -699,6 +709,8 @@
                     ((eq nlinhasremovidas 4) (setf (estado-pontos new) (+ (estado-pontos new) 800)))
                     (t 0)
                 )
+                ;Tambem tem de se devolver o estado no caso do topo do tabuleiro nao estar preenchido (nao e explicito no enunciado)
+                (return-from resultado new)
             )
         )
     )
@@ -786,5 +798,5 @@ Algoritmos de Procura (2' parte do projecto)
     (declare (ignore array lista-pecas))
 )
 
-;(load "utils.fas")
-(load (compile-file "utils.lisp"))
+(load "utils.fas")
+;(load (compile-file "utils.lisp"))
