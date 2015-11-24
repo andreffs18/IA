@@ -779,6 +779,29 @@ Algoritmos de Procura (2' parte do projecto)
     (declare (ignore problema))
 )
 
+(defun depth-first-search (estado-inicial solucao been-list moves)
+  (cond ((equal estado-inicial solucao) 
+         (reverse (cons estado-inicial been-list)))
+        (t (try-moves estado-inicial solucao been-list moves moves))))
+
+; Try-moves scans down the list of moves in moves-to-try, 
+; attempting to generate a child state.  If it produces 
+; this state, it calls depth-first-search to complete the search.
+
+(defun try-moves (estado-inicial solucao been-list moves-to-try moves)
+  (cond ((null moves-to-try) nil)
+        ((member estado-inicial been-list :test #'equal) nil)
+        (t (let ((child (funcall (car moves-to-try) estado-inicial)))
+             (if child 
+               (or (depth-first-search (funcall (car moves-to-try) estado-inicial)
+                                       solucao
+                                       (cons estado-inicial been-list)
+                                       moves)
+                   (try-moves estado-inicial solucao been-list (cdr moves-to-try) moves))
+               (try-moves estado-inicial solucao been-list (cdr moves-to-try) moves))))))
+
+    
+
 ;;; procura-A*: problema x heuristica -> lista de acoes
 (defun procura-A* (problema heuristica)
     ; usa o algo procura A* em arvore para determinar a seq de acoes
