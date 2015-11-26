@@ -4,6 +4,7 @@
 ;;;             Ana Galvao 75312               ;;;
 ;;;       Jose Diogo Oliveira 75255            ;;;
 ;;;             Andre Silva 75455              ;;;
+
 (defconstant T-NLINHAS 18)  ; 0 a 17
 (defconstant T-NCOLUNAS 10) ; 0 a 9
 
@@ -29,37 +30,26 @@
 (defun cria-tabuleiro ()
     ; criar o tabuleiro
     ; devolve tabuleiro vazio
-    (make-array (list T-NLINHAS T-NCOLUNAS) :initial-element nil)
-)
-
-;;; Aux function copy-arrays
-(defun copy-array (array &key
-                    (element-type (array-element-type array))
-                    (fill-pointer (and (array-has-fill-pointer-p array)
-                                       (fill-pointer array)))
-                    (adjustable (adjustable-array-p array)))
-  (let* ((dimensions (array-dimensions array))
-         (new-array (make-array dimensions
-                                :element-type element-type
-                                :adjustable adjustable
-                                :fill-pointer fill-pointer)))
-    (dotimes (i (array-total-size array))
-      (setf (row-major-aref new-array i)
-            (row-major-aref array i)))
-    new-array)
-)
-
-;;; copia-tabuleiro: tabuleiro -> tabuleiro
-(defun copia-tabuleiro (tabuleiro)
-    ;funcao para copiar o antigo tabuleiro para um novo
-    (copy-array tabuleiro)
+    ; (make-array (list T-NLINHAS T-NCOLUNAS) :initial-element nil)
+    ; criar a hash primeiro e depois iterar pelo numero de linhas e colunas
+    ; umas hash e uma "lista" de pares key->value, portanto, vamos guardar a key
+    ; sendo um cons da linha coluna e o value sendo nil ou true.
+    ; eg.  "0 5" -> t , na linha zero coluna cinco existe uma peca
+    (let ((tab (make-hash-table :test 'equal)))
+        (dotimes (lin T-NLINHAS tab)
+            (dotimes (col T-NCOLUNAS tab)
+                (setf (gethash (cons lin col) tab) nil)
+            )
+        )
+    )
 )
 
 ;;; tabuleiro-preenchido-p: tabuleiro x inteiro x inteiro -> logico
 (defun tabuleiro-preenchido-p (tabuleiro nlinha ncoluna)
     ; devolve true se tiver preenchida
     ; nil caso contrario
-    (not (null (aref tabuleiro nlinha ncoluna)))
+    ; (not (null (aref tabuleiro nlinha ncoluna)))
+    (not (null (gethash (cons nlinha ncoluna) tabuleiro)))
 )
 
 ;;; tabuleiro-altura-coluna: tabuleiro x inteiro -> inteiro
@@ -71,7 +61,7 @@
     ; quando a coluna nao tiver nenhuma peca
     (let ((altura 0))
         (dotimes (lin T-NLINHAS altura)  ; vou percorrer as linhas todas e returnar a altura
-            (if (not (null (aref tabuleiro lin ncoluna)))  ; se a current altura nao for nil
+            (if (tabuleiro-preenchido-p tabuleiro lin ncoluna)  ; se a current altura nao for nil
                 (setf altura (+ lin 1))  ; actualizo a var altura para a mais actual
             )
         )
@@ -84,7 +74,9 @@
     ; estiverem preenchidas
     ; false, otherwise
     (dotimes (col T-NCOLUNAS t)
-        (if (null (aref tabuleiro nlinha col)) (return nil))
+        (if (not (tabuleiro-preenchido-p tabuleiro nlinha col))
+            (return nil)
+        )
     )
 )
 
@@ -111,7 +103,7 @@
     ;(if (AND (AND (>= nlinha 0) (< nlinha T-NLINHAS)) (AND (>= ncoluna 0) (< ncoluna T-NCOLUNAS))) (setf (aref tabuleiro nlinha ncoluna) T) )
     (cond
         ((not (dentro-limites nlinha ncoluna)) nil)
-        (t (setf (aref tabuleiro nlinha ncoluna) t))
+        (t (setf (gethash (cons nlinha ncoluna) tabuleiro) t))
     )
 )
 
@@ -125,10 +117,10 @@
         (loop for lin from nlinha to (- T-NLINHAS 1)
            do (progn
                 (cond
-                    ((< lin (- T-NLINHAS 1)) (setf linha-de-cima (aref tabuleiro (+ lin 1) col)))
+                    ((< lin (- T-NLINHAS 1)) (setf linha-de-cima (gethash (cons (+ lin 1) col) tabuleiro)))
                     (t (setf linha-de-cima nil))
                 )
-                (setf (aref tabuleiro lin col) linha-de-cima)
+                (setf (gethash (cons lin col) tabuleiro) linha-de-cima)
             )
         )
     ))
@@ -141,7 +133,9 @@
     ; ALTEREI PARA DEVOLVER T QUANDO ENCONTRA POSICAO PREENCHIDA E E DEVOLVER NIL CASO NAO ENCONTRE
     (dotimes (col T-NCOLUNAS nil)
         ;(format t "(aref tabuleiro (1- T-NLINHAS) col) = ~d ~%" (aref tabuleiro (1- T-NLINHAS) col))
-        (if (aref tabuleiro (1- T-NLINHAS) col) (return t))
+        (if (tabuleiro-preenchido-p tabuleiro (1- T-NLINHAS) col)
+            (return t)
+        )
     )
 )
 
@@ -157,8 +151,16 @@
     ; linhas e 10 colunas que em cada linha e coluna dever conter
     ; o valor logico
     ; o tabuleiro retornado e um novo objecto ( nao o mesmo que o tabuleiro)
-    ; http://stackoverflow.com/questions/9549568/common-lisp-convert-between-lists-and-arrays
-    (return-from tabuleiro->array tabuleiro)
+    (let ( (array (make-array (list T-NLINHAS T-NCOLUNAS) :initial-element nil)) )
+        (maphash
+            #'(lambda (key val)
+                (let ()
+                    (setf (aref array (car key) (cdr key)) val)
+                )
+            )
+            tabuleiro)
+        (return-from tabuleiro->array array)
+    )
 )
 
 ;;; array->tabuleiro: array->tabuleiro
@@ -166,8 +168,27 @@
     ; da a entrada do array com 18 linhas e 10 colunas
     ; devolve um tabuleiro object
     ; novo objecto (nao o mesmo que o array)
-    ; http://stackoverflow.com/questions/9549568/common-lisp-convert-between-lists-and-arrays
-    (return-from array->tabuleiro array)
+    (let ( (newtab (cria-tabuleiro)) )
+        (dotimes (lin T-NLINHAS)
+            (dotimes (col T-NCOLUNAS)
+                (setf (gethash (cons lin col) newtab) (aref array lin col))
+            )
+        )
+        (return-from array->tabuleiro newtab)
+    )
+)
+
+;;; copia-tabuleiro: tabuleiro -> tabuleiro
+(defun copia-tabuleiro (tabuleiro)
+    ;funcao para copiar o antigo tabuleiro para um novo
+    (let ((newtab (cria-tabuleiro)))
+        (dotimes (lin T-NLINHAS)
+            (dotimes (col T-NCOLUNAS)
+                (setf (gethash (cons lin col) newtab) (gethash (cons lin col) tabuleiro))
+            )
+        )
+        (return-from copia-tabuleiro newtab)
+    )
 )
 
 ;;; creates type Estado
@@ -188,7 +209,6 @@
         :pecas-colocadas (copy-list (estado-pecas-colocadas estado))
         :tabuleiro (copia-tabuleiro (estado-tabuleiro estado))
     )
-    ;(estado-copy estado)
 )
 
 ;;; estados-iguais-p: estado x estado -> logico
@@ -545,6 +565,7 @@
     ; !! ordem e importante frente na lista deve estar a order
     ; com que a peca deve estar virada, (orientacao)
     (cond
+        ((estado-final-p estado) nil)
         ((eq (first (estado-pecas-por-colocar estado)) 'i) (peca-i))
         ((eq (first (estado-pecas-por-colocar estado)) 'l) (peca-l))
         ((eq (first (estado-pecas-por-colocar estado)) 'j) (peca-j))
@@ -552,22 +573,9 @@
         ((eq (first (estado-pecas-por-colocar estado)) 's) (peca-s))
         ((eq (first (estado-pecas-por-colocar estado)) 'z) (peca-z))
         ((eq (first (estado-pecas-por-colocar estado)) 't) (peca-t))
-        (t ())
+        (t nil)
     )
 )
-
-;;; TEST CASE !!!
-; (setf x (cria-accao 1 peca-l0))
-; (setf tab (cria-tabuleiro))
-; (tabuleiro-preenche! tab 0 1)
-; (tabuleiro-preenche! tab 0 2)
-; (tabuleiro-preenche! tab 0 3)
-; (tabuleiro-preenche! tab 0 4)
-; (tabuleiro-preenche! tab 1 3)
-; (tabuleiro-preenche! tab 2 3)
-; (tabuleiro-preenche! tab 3 3)
-; (tabuleiro-preenche! tab 4 3)
-
 
 ;;; detecta-colisao: tabuleiro x linha x accao-> logico
 (defun detecta-colisao (tabuleiro nlinha accao)
@@ -576,11 +584,9 @@
     ; true caso a peca esteja a coincidir com alguma posicao do tabuleiro(True)
     ; false caso a peca nao coincida com nenhuma posicao preenchida do tabuleiro
     ; METI COMENTARIOS PARA VERES ISTO A FUNCIONARRR!!! TENS UM TEST CASE EM CIMA.  SO DESCOMENTAR E CORRER
-    (let (
-            (ncoluna (accao-coluna accao))
-            (numlinhaspeca (first (array-dimensions (accao-peca accao))))
-            (numcolunaspeca (second (array-dimensions (accao-peca accao))))
-         )
+    (let ((ncoluna (accao-coluna accao))
+          (numlinhaspeca (first (array-dimensions (accao-peca accao))))
+          (numcolunaspeca (second (array-dimensions (accao-peca accao)))))
         ; (format t "ncoluna ~d ~%" ncoluna)
         ; (format t "numlinhaspeca ~d ~%" numlinhaspeca)
         ; (format t "numcolunaspeca ~d ~%" numcolunaspeca)
@@ -602,18 +608,16 @@
 (defun insere-peca (tabuleiro peca nlinha ncoluna)
     ; recebe linha e coluna a partir das quais se insere a peca no tabuleiro
     ; nao devolve nada
-    (let (
-            (numlinhaspeca (first (array-dimensions peca)))
-            (numcolunaspeca (second (array-dimensions peca)))
-
-            (lin 0)
-            (col 0)
-         )
+    (let ((numlinhaspeca (first (array-dimensions peca)))
+          (numcolunaspeca (second (array-dimensions peca)))
+          (lin 0)
+          (col 0))
         (dotimes (l numlinhaspeca)
             (dotimes (c numcolunaspeca)
                 (setf lin (+ nlinha l))
                 (setf col (+ ncoluna c))
-                (if (aref peca l c) ;NAO e lin e col mas sim l e c porque lin e col percorrem o tabuleiro e neste if percorre-se a peca
+                ;NAO e lin e col mas sim l e c porque lin e col percorrem o tabuleiro e neste if percorre-se a peca
+                (if (aref peca l c)
                     (tabuleiro-preenche! tabuleiro lin col)
                 )
             )
@@ -655,7 +659,6 @@
                 (setf colunamaior alturacoluna)
             )
         )
-        ; ERROR !!!!
         ;CICLO DE DECREMENTO DAS POSICOES DA PECA NA TABELA ATE COLISAO
         (loop for linha from colunamaior downto 0
             do (cond
@@ -679,11 +682,11 @@
         (if (tabuleiro-topo-preenchido-p tabuleiro)
             (return-from resultado new) ;Se true: devolve o estado
             (progn ;Se nil: remove linhas e calc pontos calc pontos
-                (dotimes (l (1- T-NLINHAS)) 
+                (dotimes (l (1- T-NLINHAS))
                     (cond
                         (
                             (tabuleiro-linha-completa-p tabuleiro l)
-                            (progn 
+                            (progn
                             ;remover as linhas (podemos arranjar forma de nao procurar o tabuleiro todo por uma linha preenchida)
                             (tabuleiro-remove-linha! tabuleiro l)
                             ; incrementa contador de linhas removidas
@@ -696,12 +699,10 @@
                             ;LOGO cada vez que se remove uma linha, decrementa-se para apanhar esse caso
                             (setf l (1- l))
                             )
-                                
                         )
                         (t ())
                     )
                 )
-
                 (cond  ;atribuicao da respectiva pontuacao consoante o numero de linhas removidas
                     ((eq nlinhasremovidas 1) (setf (estado-pontos new) (+ (estado-pontos new) 100)))
                     ((eq nlinhasremovidas 2) (setf (estado-pontos new) (+ (estado-pontos new) 300)))
@@ -716,11 +717,6 @@
     )
 )
 
-;;; Teste 14
-;;; Testes fn resultado
-;;deve retornar IGNORE
-;; (ignore-value )
-
 ;;; qualidade: estado -> inteiro
 (defun qualidade (estado)
     ; recebe estado e devolve inteiro que corresponde
@@ -733,12 +729,10 @@
 (defun custo-oportunidade (estado)
     ; recebe estado e devolve inteiro que corresponde
     ; nao percebo
-    (let (
-            (efectivament-conseguido (estado-pontos estado))
-            (maximo-possivel 0)
-            (todas-pecas (estado-pecas-colocadas estado))
-            (custos (make-array (list 7) :initial-element 0))  ; each position corresponds to a letter
-        )
+    (let ((efectivament-conseguido (estado-pontos estado))
+          (maximo-possivel 0)
+          (todas-pecas (estado-pecas-colocadas estado))
+          (custos (make-array (list 7) :initial-element 0)))  ; each position corresponds to a letter
         ; acumular todos os custos de todas as acoes ja feitas ate a data
         (dolist (peca todas-pecas)
             ; (format t "peca=~d ~%" peca)
@@ -762,7 +756,6 @@
         (return-from custo-oportunidade (- maximo-possivel efectivament-conseguido))
     )
 )
-
 
 #|
 Algoritmos de Procura (2' parte do projecto)
@@ -801,23 +794,7 @@ Algoritmos de Procura (2' parte do projecto)
 	)
 )
 
-; Try-moves scans down the list of moves in moves-to-try, 
-; attempting to generate a child state.  If it produces 
-; this state, it calls depth-first-search to complete the search.
 
-(defun percorre (estado-inicial end percorridos tentativas jogadas)
-  (cond ((null tentativas) nil)
-        ((member estado-inicial percorridos :test #'equal) nil)
-        (t (let ((child (funcall (car percorridos) estado-inicial)))
-             (if child 
-               (or (procura-pp (funcall (car tentativas) estado-inicial end)
-                                       end         
-                                       (cons estado-inicial percorridos)
-                                       jogadas)
-                   (tentativas estado-inicial end percorridos (cdr tentativas) jogadas))
-               (tentativas estado-inicial end percorridos (cdr tentativas) jogadas))))))
-
-    
 
 ;;; procura-A*: problema x heuristica -> lista de acoes
 (defun procura-A* (problema heuristica)
@@ -829,8 +806,23 @@ Algoritmos de Procura (2' parte do projecto)
     ; em caso de empate entre dois nos com igual valor de f
     ; deve ser escolhido o ultimo a ser colocado
     ; generico.. nao so para o tetris mas para qualuer problema
+    ; check pseuso code here -> https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
     (declare (ignore problema heuristica))
 )
+; (setf prob (make-problema
+;     :estado-inicial (make-estado
+;                         :pontos 0
+;                         :tabuleiro t1
+;                         :pecas-colocadas ()
+;                         :pecas-por-colocar '(l j)
+;                     )
+;     :solucao #'solucao
+;     :accoes #'accoes
+;     :resultado #'resultado
+;     :custo-caminho #'qualidade))
+; (setf heur #'(lambda (x) 0))
+; (procura-A* prob heur)
+
 
 ;;; procura-best: array x listapecas -> lista de acoes
 (defun procura-best (array lista-pecas)
