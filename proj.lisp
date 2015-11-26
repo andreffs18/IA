@@ -814,14 +814,14 @@ Algoritmos de Procura (2' parte do projecto)
          ((member estado-inicial visitados :test #'equal) nil)  ; se nao existirem accoes a serem aplicadas
          (t (let ((child (funcall (car visitados) estado-inicial))))    ; se existirem cria-se um child e aplica-se a procura
           (if child 
-            (or (procura-pp (setf problema (make-problema 
+            (procura-pp (setf problema (make-problema 
                 :estado-inicial child
                 :solucao #'solucao
                 :accoes #'accoes
                 :resultado #'resultado
                 :custo-caminho #'custo-caminho))
                 )
-            )
+            
             )
           )
         )
