@@ -798,25 +798,30 @@ Algoritmos de Procura (2' parte do projecto)
     ; ultimo n a ser colocado na fronteira dever ser o primeiro a ser explorado.
     ; generico.. nao so para o tetris mas para qualquer problema
     
+    (let ((visitados (make-list 1 :initial-element (problema-estado-inicial problema)))
+        (child nil)
+        )
+        
+        
 
-
-    (reverse (setf visitados (make-list 1 :initial-element (problema-estado-inicial problema))))
+    ; (reverse (setf visitados (make-list 1 :initial-element (problema-estado-inicial problema))))
 
     (cond (equalp :estado-inicial :solucao)                   ;se estado inicial for solucao adiciona-se a lista de visitados e check como solucao
-      (setf :solucao (cons (:solucao :estado-inicial)))
+      ;(setf :solucao (cons (:solucao :estado-inicial)))
 
 
       (t
-       (cond ((null :accoes) nil)
-         (reverse (setf visitados (cons (:estado-inicial visitados)))) ; se nao existirem accoes a serem aplicadas
-         (t (let ((child (funcall (car visitados) :estado-inicial))))    ; se existirem cria-se um child e aplica-se a procura
+       (cond ((null (problema-accoes problema)) nil)
+         (setf visitados (append '(problema-estado-inicial problema) visitados)) ; se nao existirem accoes a serem aplicadas
+         (t (setf child (funcall #'resultado ((first visitados) accao)))    ; se existirem cria-se um child e aplica-se a procura
+            (setf visitados (rest visitados))
           (if child 
-            (procura-pp (setf problema (make-problema 
+            (procura-pp (make-problema 
                 :estado-inicial child
                 :solucao #'solucao
                 :accoes #'accoes
                 :resultado #'resultado
-                :custo-caminho #'qualidade))
+                :custo-caminho #'qualidade)
                 )
             
             )
@@ -825,8 +830,9 @@ Algoritmos de Procura (2' parte do projecto)
        )
     )
 
-)
     )
+    )
+)
 
 ;;; procura-A*: problema x heuristica -> lista de acoes
 (defun procura-A* (problema heuristica)
