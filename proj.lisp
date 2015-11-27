@@ -154,10 +154,16 @@
     (let ( (array (make-array (list T-NLINHAS T-NCOLUNAS) :initial-element nil)) )
         (maphash
             #'(lambda (key val)
-                (let ()
+                    (print "linha:")
+                    (print (car key))
+                    (print "coluna:")
+                    (print (cdr key))
+                    (print "val:")
+                    (print val)
+
                     (setf (aref array (car key) (cdr key)) val)
                     )
-                )
+                
             tabuleiro)
         (return-from tabuleiro->array array)
         )
@@ -776,8 +782,8 @@
 Algoritmos de Procura (2' parte do projecto)
 |#
 
-(setf estado1 (make-estado :pontos 0 :tabuleiro (cria-tabuleiro) :pecas-colocadas () :pecas-por-colocar '(o l t s z)))
-(setf problema1 (make-problema :estado-inicial estado1 :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
+;(setf estado1 (make-estado :pontos 0 :tabuleiro (cria-tabuleiro) :pecas-colocadas () :pecas-por-colocar '(o l t s z)))
+;(setf problema1 (make-problema :estado-inicial estado1 :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
 ;;; procura-pp: problema -> lista de acoes
 (defun procura-pp (problema)
     ; usa procura em profundidade primeiro em arvore
@@ -796,39 +802,39 @@ Algoritmos de Procura (2' parte do projecto)
         ;     :pecas-por-colocar '(o l t s z)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
     ;(print (problema-estado-inicial problema))
 
-    (let ((por-explorar (make-list 1 :initial-element problema)))
+    (let ((por-explorar (make-list 1 :initial-element problema)) (newprob nil))
         (loop while (not (null por-explorar)) do
-            (print "dentro when ~%tamanho por explorar")
-            (print (list-length por-explorar))
+            ;(print "dentro when ~%tamanho por explorar")
+            ;(print (list-length por-explorar))
 
             (setf problema (first por-explorar))
             (setf por-explorar (rest por-explorar))
             
-            (print "problema ~%tamanho por explorar")
-            (print (list-length por-explorar))     
-            (print (funcall #'solucao (problema-estado-inicial problema)))
+            ;(print "problema ~%tamanho por explorar")
+            ;(print (list-length por-explorar))     
+            ;(print (funcall #'solucao (problema-estado-inicial problema)))
             (cond 
                 ((funcall #'solucao (problema-estado-inicial problema)) (return-from procura-pp (problema-accoes problema))) 
-                (t  (print "DOLIST~%estados ") 
-                    (print (list-length (funcall #'accoes (problema-estado-inicial problema)))) 
+                (t  ;(print "DOLIST~%estados ") 
+                    ;(print (list-length (funcall #'accoes (problema-estado-inicial problema)))) 
                     (dolist (n (funcall #'accoes (problema-estado-inicial problema)))
                     (setf newprob (make-list 1 :initial-element (make-problema
                                     :estado-inicial (funcall #'resultado (problema-estado-inicial problema) n)
                                     :solucao #'solucao
-                                    :accoes #'accoes
+                                    :accoes (funcall #'accoes (problema-estado-inicial problema))
                                     :resultado #'resultado
                                     :custo-caminho #'qualidade)))
                     (setf por-explorar (append newprob por-explorar))
-                    (print (list-length por-explorar)) 
+                    ;(print (list-length por-explorar)) 
                     )
                 )
             )
-            (print "(not (null por-explorar)~%")
-            (print (not (null por-explorar))) 
+            ;(print "(not (null por-explorar)~%")
+            ;(print (not (null por-explorar))) 
         )
     )
     
-
+)
 
     ; (print (funcall #'solucao (problema-estado-inicial problema)))
     ; (cond 
@@ -875,7 +881,7 @@ Algoritmos de Procura (2' parte do projecto)
 
     ; )
     ; )
-)
+
 
 ;;; procura-A*: problema x heuristica -> lista de acoes
 (defun procura-A* (problema heuristica)
