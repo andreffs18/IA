@@ -776,8 +776,8 @@
 Algoritmos de Procura (2' parte do projecto)
 |#
 
-(setf estado1 (make-estado :pontos 0 :tabuleiro (cria-tabuleiro) :pecas-colocadas () :pecas-por-colocar '(o l t s z)))
-(setf problema1 (make-problema :estado-inicial estado1 :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
+;(setf estado1 (make-estado :pontos 0 :tabuleiro (cria-tabuleiro) :pecas-colocadas () :pecas-por-colocar '(o l t s z)))
+;(setf problema1 (make-problema :estado-inicial estado1 :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
 ;;; procura-pp: problema -> lista de acoes
 (defun procura-pp (problema)
     ; usa procura em profundidade primeiro em arvore
@@ -796,7 +796,7 @@ Algoritmos de Procura (2' parte do projecto)
         ;     :pecas-por-colocar '(o l t s z)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
     ;(print (problema-estado-inicial problema))
 
-    (let ((por-explorar (make-list 1 :initial-element problema)))
+    (let ((por-explorar (make-list 1 :initial-element problema)) (newprob))
         (loop while (not (null por-explorar)) do
             (print "dentro when ~%tamanho por explorar")
             (print (list-length por-explorar))
