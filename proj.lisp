@@ -799,20 +799,17 @@ Algoritmos de Procura (2' parte do projecto)
     ; generico.. nao so para o tetris mas para qualquer problema
     
 
-    (let (
-    	(visitados  nil)       ;lista de visitados nula
-    	)
-    )
 
-    (cond (equalp estado-inicial solucao)                   ;se estado inicial for solucao adiciona-se a lista de visitados e check como solucao
-      (reverse (setf visitados (cons estado-inicial visitados)))
-      (setf (cons (solucao estado-inicial)))
+	(reverse (setf visitados (make-list 1 'estado-inicial)))
+
+    (cond (equalp :estado-inicial :solucao)                   ;se estado inicial for solucao adiciona-se a lista de visitados e check como solucao
+      (setf :solucao (cons (:solucao :estado-inicial)))
 
 
       (t
-       (cond ((null accoes) nil)
-         ((member estado-inicial visitados :test #'equal) nil)  ; se nao existirem accoes a serem aplicadas
-         (t (let ((child (funcall (car visitados) estado-inicial))))    ; se existirem cria-se um child e aplica-se a procura
+       (cond ((null :accoes) nil)
+         (reverse (setf visitados (cons :estado-inicial visitados))) ; se nao existirem accoes a serem aplicadas
+         (t (let ((child (funcall (car visitados) :estado-inicial))))    ; se existirem cria-se um child e aplica-se a procura
           (if child 
             (procura-pp (setf problema (make-problema 
                 :estado-inicial child
