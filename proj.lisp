@@ -236,7 +236,7 @@
     custo-caminho   ; funcao que dado um estado devolve o custo do caminho desde o estado inicial
     )
 
-(defun cria-problema (problema)
+(defun cria-problema ()
     (make-problema
         :estado-inicial (make-estado
         :pontos 0
@@ -247,7 +247,7 @@
         :solucao #'solucao
         :accoes #'accoes
         :resultado #'resultado
-        :custo-caminho #'custo-caminho
+        :custo-caminho #'qualidade
     )
     ; (make-problema
     ;     :estado-inicial (make-estado
@@ -800,7 +800,7 @@ Algoritmos de Procura (2' parte do projecto)
     
 
 
-	(reverse (setf visitados (make-list 1 'estado-inicial)))
+    (reverse (setf visitados (make-list 1 :initial-element (problema-estado-inicial problema))))
 
     (cond (equalp :estado-inicial :solucao)                   ;se estado inicial for solucao adiciona-se a lista de visitados e check como solucao
       (setf :solucao (cons (:solucao :estado-inicial)))
@@ -808,7 +808,7 @@ Algoritmos de Procura (2' parte do projecto)
 
       (t
        (cond ((null :accoes) nil)
-         (reverse (setf visitados (cons :estado-inicial visitados))) ; se nao existirem accoes a serem aplicadas
+         (reverse (setf visitados (cons (:estado-inicial visitados)))) ; se nao existirem accoes a serem aplicadas
          (t (let ((child (funcall (car visitados) :estado-inicial))))    ; se existirem cria-se um child e aplica-se a procura
           (if child 
             (procura-pp (setf problema (make-problema 
@@ -816,16 +816,17 @@ Algoritmos de Procura (2' parte do projecto)
                 :solucao #'solucao
                 :accoes #'accoes
                 :resultado #'resultado
-                :custo-caminho #'custo-caminho))
+                :custo-caminho #'qualidade))
                 )
             
             )
           )
-        )
+
        )
     )
 
 )
+    )
 
 ;;; procura-A*: problema x heuristica -> lista de acoes
 (defun procura-A* (problema heuristica)
