@@ -573,8 +573,8 @@
         ((eq (first (estado-pecas-por-colocar estado)) 'z) (peca-z))
         ((eq (first (estado-pecas-por-colocar estado)) 't) (peca-t))
         (t nil)
-        )
     )
+)
 
 ;;; detecta-colisao: tabuleiro x linha x accao-> logico
 (defun detecta-colisao (tabuleiro nlinha accao)
@@ -626,7 +626,7 @@
                 )
         )
     )
-    )
+)
 
 ;;; resultado: estado x accao -> estado
 (defun resultado (estado accao)
@@ -734,13 +734,13 @@
                     )
                 ;Tambem tem de se devolver o estado no caso do topo do tabuleiro nao estar preenchido (nao e explicito no enunciado)
                 (return-from resultado new)
-                )
-)
-)
+            )
+        )
+    )
 )
 
-(setf estado1 (make-estado :pontos 0 :pecas-por-colocar '(t i j t z j) :pecas-colocadas '() :tabuleiro (cria-tabuleiro)))
-(setf estado2 (resultado estado1 '(0 . #2A((T T T)(NIL T NIL)))))
+;(setf estado1 (make-estado :pontos 0 :pecas-por-colocar '(t i j t z j) :pecas-colocadas '() :tabuleiro (cria-tabuleiro)))
+;   (setf estado2 (resultado estado1 '(0 . #2A((T T T)(NIL T NIL)))))
 
 
 ;;; qualidade: estado -> inteiro
@@ -749,7 +749,7 @@
     ; ao valor de pontos ganhos ate ao momento em valor negativo.
     ; **** LER COM MAIS ATENCAO ****
     (* -1 (estado-pontos estado))
-    )
+)
 
 ;;; custo-oportunidade: estado -> inteiro
 (defun custo-oportunidade (estado)
@@ -780,12 +780,30 @@
         ; (format t "efectivament-conseguido=~d ~%" efectivament-conseguido)
         ; return difference
         (return-from custo-oportunidade (- maximo-possivel efectivament-conseguido))
-        )
+    )
 )
 
 #|
 Algoritmos de Procura (2' parte do projecto)
 |#
+
+
+(setf t1 (cria-tabuleiro))
+(dotimes (coluna 9)
+    (tabuleiro-preenche! t1 0 (+ coluna 1))
+    (tabuleiro-preenche! t1 1 (+ coluna 1))
+    (tabuleiro-preenche! t1 2 (+ coluna 1))
+)
+(setf estado1 (make-estado :pontos 0
+                           :tabuleiro t1
+                           :pecas-colocadas ()
+                           :pecas-por-colocar '(o o o o o l l t t j j i i)))
+
+(setf problema1 (make-problema :estado-inicial estado1
+                               :solucao #'solucao
+                               :accoes #'accoes
+                               :resultado #'resultado
+                               :custo-caminho #'(lambda (x) 0)))
 
 ;(setf estado1 (make-estado :pontos 0 :tabuleiro (cria-tabuleiro) :pecas-colocadas () :pecas-por-colocar '(o l t s z)))
 ;(setf problema1 (make-problema :estado-inicial estado1 :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
@@ -807,31 +825,46 @@ Algoritmos de Procura (2' parte do projecto)
         ;     :pecas-por-colocar '(o l t s z)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
     ;(print (problema-estado-inicial problema))
 
-    (let ((por-explorar (make-list 1 :initial-element problema)) (newprob nil))
+    (let ((output (list))
+          (por-explorar (list problema))
+          (newprob nil))
+        ;(format t "por-explorar length ~d ~%" (list-length por-explorar))
+        ;(format t "newprob ~d ~%" newprob)
+
+        ;(format t "(not (null por-explorar) ~d ~%" (not (null por-explorar)))
         (loop while (not (null por-explorar)) do
-            ;(print "dentro when ~%tamanho por explorar")
-            ;(print (list-length por-explorar))
+            (format t "(list-length por-explorar) ~d ~%" (list-length por-explorar))
 
             (setf problema (first por-explorar))
             (setf por-explorar (rest por-explorar))
 
-            ;(print "problema ~%tamanho por explorar")
-            ;(print (list-length por-explorar))
-            ;(print (funcall #'solucao (problema-estado-inicial problema)))
+            (format t "(list-length por-explorar) ~d ~%" (list-length por-explorar))
+
+            (format t "problema e goal? ~d ~%" (funcall #'solucao (problema-estado-inicial problema)))
+            (format t "~d ~%" (problema-estado-inicial problema))
+            (format t "~d ~%" (tabuleiro->array (estado-tabuleiro (problema-estado-inicial problema))))
             (cond
-                ((funcall #'solucao (problema-estado-inicial problema)) (return-from procura-pp (problema-accoes problema)))
-                (t  ;(print "DOLIST~%estados ")
+                ((funcall #'solucao (problema-estado-inicial problema))
+                    (format t "FODASSE ~d ~%" output)
+                    (return-from procura-pp output))
+                    ;(return-from procura-pp (problema-accoes problema)))
+                (t  (format t "loop over ~d acoes ~%" (list-length (funcall #'accoes (problema-estado-inicial problema))))
                     ;(print (list-length (funcall #'accoes (problema-estado-inicial problema))))
-                    (dolist (n (funcall #'accoes (problema-estado-inicial problema)))
-                    (setf newprob (make-list 1 :initial-element (make-problema
-                                    :estado-inicial (funcall #'resultado (problema-estado-inicial problema) n)
-                                    :solucao #'solucao
-                                    :accoes (funcall #'accoes (problema-estado-inicial problema))
-                                    :resultado #'resultado
-                                    :custo-caminho #'qualidade)))
-                    (setf por-explorar (append newprob por-explorar))
-                    ;(print (list-length por-explorar))
+                    (setf FODASSE (funcall #'accoes (problema-estado-inicial problema)))
+                    (format t "FODASSE ~d ~%" FODASSE)
+                    (dolist (acao FODASSE)
+                        (format t "#\"~d\" create new problem with this action~%" acao)
+                        (setf newprob (list (make-problema :estado-inicial (funcall #'resultado (problema-estado-inicial problema) acao)
+                                                           :solucao #'solucao
+                                                           :accoes (funcall #'accoes (problema-estado-inicial problema))
+                                                           :resultado #'resultado
+                                                           :custo-caminho #'qualidade)))
+                        (format t "adding it to \"por-explorar\" list (~d to ~d) ~%" (list-length por-explorar) (1+ (list-length por-explorar)))
+                        (setf por-explorar (append newprob por-explorar))
                     )
+                    (format t "last fodasse ~d ~%" (last FODASSE))
+                    (setf output (append output (last FODASSE)))
+                    (format t "is bigger ? ~d ~%" (list-length output))
                 )
             )
             ;(print "(not (null por-explorar)~%")
@@ -840,52 +873,6 @@ Algoritmos de Procura (2' parte do projecto)
     )
 
 )
-
-    ; (print (funcall #'solucao (problema-estado-inicial problema)))
-    ; (cond
-    ;     ((funcall #'solucao (problema-estado-inicial problema)) (print "YOLO") (return-from procura-pp (problema-accoes problema)))
-    ;     (t (dolist (n (funcall #'accoes (problema-estado-inicial problema)))
-    ;             (print "lol")
-    ;             (procura-pp (make-problema
-    ;                 :estado-inicial (funcall #'resultado (problema-estado-inicial problema) n)
-    ;                 :solucao #'solucao
-    ;                 :accoes #'accoes
-    ;                 :resultado #'resultado
-    ;                 :custo-caminho #'qualidade)
-    ;             )
-    ;         )
-    ;     )
-    ; )
-
-
-    ; (reverse (setf visitados (make-list 1 :initial-element (problema-estado-inicial problema))))
-
-    ; (cond (equalp :estado-inicial :solucao)                   ;se estado inicial for solucao adiciona-se a lista de visitados e check como solucao
-    ;   ;(setf :solucao (cons (:solucao :estado-inicial)))
-
-
-    ;   (t
-    ;    (cond ((null (problema-accoes problema)) nil)
-    ;      (setf visitados (append '(problema-estado-inicial problema) visitados)) ; se nao existirem accoes a serem aplicadas
-    ;      (t (setf child (funcall #'resultado '((first visitados) accao)))    ; se existirem cria-se um child e aplica-se a procura
-    ;         (setf visitados (rest visitados))
-    ;       (if child
-    ;         (procura-pp (make-problema
-    ;             :estado-inicial child
-    ;             :solucao #'solucao
-    ;             :accoes #'accoes
-    ;             :resultado #'resultado
-    ;             :custo-caminho #'qualidade)
-    ;             )
-
-    ;         )
-    ;       )
-
-    ;    )
-    ; )
-
-    ; )
-    ; )
 
 
 ;;; procura-A*: problema x heuristica -> lista de acoes
@@ -900,27 +887,13 @@ Algoritmos de Procura (2' parte do projecto)
     ; generico.. nao so para o tetris mas para qualuer problema
     ; check pseuso code here -> https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
     (declare (ignore problema heuristica))
-    )
-; (setf prob (make-problema
-;     :estado-inicial (make-estado
-;                         :pontos 0
-;                         :tabuleiro t1
-;                         :pecas-colocadas ()
-;                         :pecas-por-colocar '(l j)
-;                     )
-;     :solucao #'solucao
-;     :accoes #'accoes
-;     :resultado #'resultado
-;     :custo-caminho #'qualidade))
-; (setf heur #'(lambda (x) 0))
-; (procura-A* prob heur)
-
+)
 
 ;;; procura-best: array x listapecas -> lista de acoes
 (defun procura-best (array lista-pecas)
     ;;;;;; este e o avaliado
     (declare (ignore array lista-pecas))
-    )
+)
 
 (load "utils.fas")
 ;(load (compile-file "utils.lisp"))
