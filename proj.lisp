@@ -647,7 +647,6 @@
 
         (colunamaior 0)
         (alturacoluna 0)
-
         (nlinhasremovidas 0)
         (pos_mais_esquerda 0)
         (altura_desta_posicao 0)
