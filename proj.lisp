@@ -803,7 +803,6 @@ Algoritmos de Procura (2' parte do projecto)
     ;(print (problema-estado-inicial problema))
 
     (let ((por-explorar (make-list 1 :initial-element problema)) (newprob nil))
-
         (loop while (not (null por-explorar)) do
             ;(print "dentro when ~%tamanho por explorar")
             ;(print (list-length por-explorar))
