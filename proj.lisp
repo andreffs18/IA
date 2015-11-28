@@ -151,23 +151,15 @@
     ; linhas e 10 colunas que em cada linha e coluna dever conter
     ; o valor logico
     ; o tabuleiro retornado e um novo objecto ( nao o mesmo que o tabuleiro)
-    (let ( (array (make-array (list T-NLINHAS T-NCOLUNAS) :initial-element nil)) )
+    (let ((array (make-array (list T-NLINHAS T-NCOLUNAS) :initial-element nil)) )
         (maphash
             #'(lambda (key val)
-                    (print "linha:")
-                    (print (car key))
-                    (print "coluna:")
-                    (print (cdr key))
-                    (print "val:")
-                    (print val)
-
                     (setf (aref array (car key) (cdr key)) val)
-                    )
-                
+            )
             tabuleiro)
-        (return-from tabuleiro->array array)
-        )
+    (return-from tabuleiro->array array)
     )
+)
 
 ;;; array->tabuleiro: array->tabuleiro
 (defun array->tabuleiro (array)
@@ -242,20 +234,6 @@
     custo-caminho   ; funcao que dado um estado devolve o custo do caminho desde o estado inicial
     )
 
-    ; (make-problema
-    ;     :estado-inicial (make-estado
-    ;     :pontos 0
-    ;     :tabuleiro t1
-    ;     :pecas-colocadas ()
-    ;     :pecas-por-colocar '(l j)
-    ;     )
-
-    ;     :solucao (funcall problema-solucao problema)
-    ;     :accoes (funcall problema-accoes problema)
-    ;     :resultado (funcall problema-resultado problema)
-    ;     :custo-caminho (funcall problema-custo-caminho problema)
-    ; )
-
 
 ;;; solucao: estado -> logico
 (defun solucao (estado)
@@ -274,16 +252,16 @@
 ;     (1 . #2A((T) (T) (T) (T)))
 ;     (2 . #2A((T) (T) (T) (T)))
 ;     (3 . #2A((T) (T) (T) (T)))
-;     (4 . #2A((T) (T) (T) (T)))  ;
-;     (5 . #2A((T) (T) (T) (T)))  ;
-;     (6 . #2A((T) (T) (T) (T)))  ;
-;     (7 . #2A((T) (T) (T) (T)))  ;
+;     (4 . #2A((T) (T) (T) (T)))  ; T
+;     (5 . #2A((T) (T) (T) (T)))  ; T
+;     (6 . #2A((T) (T) (T) (T)))  ; T
+;     (7 . #2A((T) (T) (T) (T)))  ; T
 ;     (8 . #2A((T) (T) (T) (T)))
 ;     (9 . #2A((T) (T) (T) (T)))
 ;     (0 . #2A((T T T T)))
 ;     (1 . #2A((T T T T)))
 ;     (2 . #2A((T T T T))) ;
-;     (3 . #2A((T T T T))) ;
+;     (3 . #2A((T T T T))) ;  T T T T
 ;     (4 . #2A((T T T T))) ;
 ;     (5 . #2A((T T T T))) ;
 ;     (6 . #2A((T T T T)))
@@ -662,33 +640,52 @@
         (new (copia-estado estado))
         (tabuleiro (estado-tabuleiro new))
 
-        (coluna (accao-coluna accao))
-        (peca (accao-peca accao))
-
-        (numcolunaspeca (second (array-dimensions peca)))
+        (coluna (accao-coluna accao))  ; 0
+        (peca (accao-peca accao))  ; # T #
+                                   ; T T T
+        (numcolunaspeca (second (array-dimensions peca)))  ; 3
 
         (colunamaior 0)
-        (nlinhasremovidas 0)
         (alturacoluna 0)
+        (nlinhasremovidas 0)
+        (pos_mais_esquerda 0)
+        (altura_desta_posicao 0)
         )
 
         ;CICLO DESCOBRIR COLUNA MAIOR DO TABULEIRO (ONDE A PECA PUDERA COLIDIR)
         (dotimes (c numcolunaspeca)
             ;verifica qual das colunas do tabuleiro que estao por baixo da peca e maior
-            (setf alturacoluna (tabuleiro-altura-coluna tabuleiro (+ c coluna)))
-            (if (> alturacoluna colunamaior)
-                (setf colunamaior alturacoluna)
+            (setf pos_mais_esquerda (+ c coluna))
+            (setf altura_desta_posicao (tabuleiro-altura-coluna tabuleiro pos_mais_esquerda))
+            (if (> altura_desta_posicao alturacoluna)
+                (progn
+                    (setf alturacoluna altura_desta_posicao)
+                    (setf colunamaior pos_mais_esquerda)
                 )
             )
+        )
+
+        ;(format t "alturacoluna = ~d ~%" alturacoluna)
+        ;(format t "colunamaior = ~d ~%" colunamaior)
+
         ;CICLO DE DECREMENTO DAS POSICOES DA PECA NA TABELA ATE COLISAO
-        (loop for linha from colunamaior downto 0
-            do (cond
-                ;Se nao detectar nenhuma colisao e estiver no fundo do tabuleiro (a peca) -> coloca-a nessa posicao
-                ((AND (not (detecta-colisao tabuleiro linha accao)) (eq linha 0)) (insere-peca tabuleiro peca linha coluna)) ;ESTAVA AQUI O BUG TESTE 15
-                ;Se detectar uma colisao -> coloca a peca na posicao anterior
-                ((detecta-colisao tabuleiro linha accao) (insere-peca tabuleiro peca (1+ linha) coluna))
+        (loop for linha from alturacoluna downto 0
+            do (progn
+                ;(format t "inside loop (linha) = ~d ~%" linha)
+                ;(format t "inside loop (coluna) = ~d ~%" coluna)
+                ;(format t "(detecta-colisao tabuleiro linha accao) = ~d ~%" (detecta-colisao tabuleiro linha accao))
+                ;(format t "(eq linha 0) = ~d ~%" (eq linha 0))
+
+                (cond
+                    ;Se nao detectar nenhuma colisao e estiver no fundo do tabuleiro (a peca) -> coloca-a nessa posicao
+                    ((AND (not (detecta-colisao tabuleiro linha accao)) (eq linha 0)) (insere-peca tabuleiro peca linha coluna) (return)) ;ESTAVA AQUI O BUG TESTE 15
+                    ;Se detectar uma colisao -> coloca a peca na posicao anterior
+                    ((detecta-colisao tabuleiro linha accao) (insere-peca tabuleiro peca (1+ linha) coluna) (return))
+                    ;(t ())
                 )
             )
+        )
+        ;(format t "YOLOOOOOOOOO")
 
         ;ACTUALIZAR A LISTA DE PECAS COLOCADAS PELA LISTA DE PECAS POR COLOCAR
         (setf (estado-pecas-colocadas new) (append (list (first (estado-pecas-por-colocar new))) (estado-pecas-colocadas new)))
@@ -737,6 +734,10 @@
 )
 )
 )
+
+;(setf estado1 (make-estado :pontos 0 :pecas-por-colocar '(t i j t z j) :pecas-colocadas '() :tabuleiro (cria-tabuleiro)))
+;(setf estado2 (resultado estado1 '(0 . #2A((T T T)(NIL T NIL)))))
+
 
 ;;; qualidade: estado -> inteiro
 (defun qualidade (estado)
@@ -793,12 +794,12 @@ Algoritmos de Procura (2' parte do projecto)
     ; deve utilizar LIFO (last in first out)
     ; ultimo n a ser colocado na fronteira dever ser o primeiro a ser explorado.
     ; generico.. nao so para o tetris mas para qualquer problema
-    
+
 
     ; (let ((visitados (make-list)))
     ;     (child nil)
     ;     )
-        ; (procura-pp (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () 
+        ; (procura-pp (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas ()
         ;     :pecas-por-colocar '(o l t s z)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
     ;(print (problema-estado-inicial problema))
 
@@ -809,14 +810,14 @@ Algoritmos de Procura (2' parte do projecto)
 
             (setf problema (first por-explorar))
             (setf por-explorar (rest por-explorar))
-            
+
             ;(print "problema ~%tamanho por explorar")
-            ;(print (list-length por-explorar))     
+            ;(print (list-length por-explorar))
             ;(print (funcall #'solucao (problema-estado-inicial problema)))
-            (cond 
-                ((funcall #'solucao (problema-estado-inicial problema)) (return-from procura-pp (problema-accoes problema))) 
-                (t  ;(print "DOLIST~%estados ") 
-                    ;(print (list-length (funcall #'accoes (problema-estado-inicial problema)))) 
+            (cond
+                ((funcall #'solucao (problema-estado-inicial problema)) (return-from procura-pp (problema-accoes problema)))
+                (t  ;(print "DOLIST~%estados ")
+                    ;(print (list-length (funcall #'accoes (problema-estado-inicial problema))))
                     (dolist (n (funcall #'accoes (problema-estado-inicial problema)))
                     (setf newprob (make-list 1 :initial-element (make-problema
                                     :estado-inicial (funcall #'resultado (problema-estado-inicial problema) n)
@@ -825,23 +826,23 @@ Algoritmos de Procura (2' parte do projecto)
                                     :resultado #'resultado
                                     :custo-caminho #'qualidade)))
                     (setf por-explorar (append newprob por-explorar))
-                    ;(print (list-length por-explorar)) 
+                    ;(print (list-length por-explorar))
                     )
                 )
             )
             ;(print "(not (null por-explorar)~%")
-            ;(print (not (null por-explorar))) 
+            ;(print (not (null por-explorar)))
         )
     )
-    
+
 )
 
     ; (print (funcall #'solucao (problema-estado-inicial problema)))
-    ; (cond 
-    ;     ((funcall #'solucao (problema-estado-inicial problema)) (print "YOLO") (return-from procura-pp (problema-accoes problema))) 
-    ;     (t (dolist (n (funcall #'accoes (problema-estado-inicial problema))) 
+    ; (cond
+    ;     ((funcall #'solucao (problema-estado-inicial problema)) (print "YOLO") (return-from procura-pp (problema-accoes problema)))
+    ;     (t (dolist (n (funcall #'accoes (problema-estado-inicial problema)))
     ;             (print "lol")
-    ;             (procura-pp (make-problema 
+    ;             (procura-pp (make-problema
     ;                 :estado-inicial (funcall #'resultado (problema-estado-inicial problema) n)
     ;                 :solucao #'solucao
     ;                 :accoes #'accoes
@@ -864,15 +865,15 @@ Algoritmos de Procura (2' parte do projecto)
     ;      (setf visitados (append '(problema-estado-inicial problema) visitados)) ; se nao existirem accoes a serem aplicadas
     ;      (t (setf child (funcall #'resultado '((first visitados) accao)))    ; se existirem cria-se um child e aplica-se a procura
     ;         (setf visitados (rest visitados))
-    ;       (if child 
-    ;         (procura-pp (make-problema 
+    ;       (if child
+    ;         (procura-pp (make-problema
     ;             :estado-inicial child
     ;             :solucao #'solucao
     ;             :accoes #'accoes
     ;             :resultado #'resultado
     ;             :custo-caminho #'qualidade)
     ;             )
-            
+
     ;         )
     ;       )
 
