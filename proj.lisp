@@ -584,19 +584,23 @@
     ; false caso a peca nao coincida com nenhuma posicao preenchida do tabuleiro
     ; METI COMENTARIOS PARA VERES ISTO A FUNCIONARRR!!! TENS UM TEST CASE EM CIMA.  SO DESCOMENTAR E CORRER
     (let ((ncoluna (accao-coluna accao))
-      (numlinhaspeca (first (array-dimensions (accao-peca accao))))
-      (numcolunaspeca (second (array-dimensions (accao-peca accao)))))
-        ; (format t "ncoluna ~d ~%" ncoluna)
-        ; (format t "numlinhaspeca ~d ~%" numlinhaspeca)
-        ; (format t "numcolunaspeca ~d ~%" numcolunaspeca)
+          (peca (accao-peca accao))
+          (numlinhaspeca (first (array-dimensions (accao-peca accao))))
+          (numcolunaspeca (second (array-dimensions (accao-peca accao))))
+         )
+        ;(format t "ncoluna ~d ~%" ncoluna)
+        ;(format t "numlinhaspeca ~d ~%" numlinhaspeca)
+        ;(format t "numcolunaspeca ~d ~%" numcolunaspeca)
         (dotimes (l numlinhaspeca nil)
             (dotimes (c numcolunaspeca)
                 ;#1 verifica se a posicao que se ira comparar esta dentro dos limites do tabuleiro
                 ;#2 verifica se alguma posicao da peca (a True) coincide com alguma posicao do tabuleiro (a True)
-                ; (format t "l=~d, c=~d | dentro-limites=~d | tabuleiro-preenchido=~d ~%" l c (dentro-limites (+ nlinha l) (+ ncoluna c)) (tabuleiro-preenchido-p tabuleiro (+ nlinha l) (+ ncoluna c)))
+                ;#3 se a peca esta preenchida nessa posicao
+                ;(format t "l=~d, c=~d | dentro-limites=~d | tabuleiro-preenchido=~d ~%" l c (dentro-limites (+ nlinha l) (+ ncoluna c)) (tabuleiro-preenchido-p tabuleiro (+ nlinha l) (+ ncoluna c)))
                 (if (AND
                         (dentro-limites (+ nlinha l) (+ ncoluna c))  ; #1
                         (tabuleiro-preenchido-p tabuleiro (+ nlinha l) (+ ncoluna c)) ; #2
+                        (aref peca l c) ; #3
                         ) (return-from detecta-colisao t) )
                 )
             )
@@ -717,10 +721,10 @@
                             ;LOGO cada vez que se remove uma linha, decrementa-se para apanhar esse caso
                             (setf l (1- l))
                             )
-                            )
-(t ())
-)
-)
+                        )
+                        (t ())
+                    )
+                )
                 (cond  ;atribuicao da respectiva pontuacao consoante o numero de linhas removidas
                     ((eq nlinhasremovidas 1) (setf (estado-pontos new) (+ (estado-pontos new) 100)))
                     ((eq nlinhasremovidas 2) (setf (estado-pontos new) (+ (estado-pontos new) 300)))
@@ -735,8 +739,8 @@
 )
 )
 
-;(setf estado1 (make-estado :pontos 0 :pecas-por-colocar '(t i j t z j) :pecas-colocadas '() :tabuleiro (cria-tabuleiro)))
-;(setf estado2 (resultado estado1 '(0 . #2A((T T T)(NIL T NIL)))))
+(setf estado1 (make-estado :pontos 0 :pecas-por-colocar '(t i j t z j) :pecas-colocadas '() :tabuleiro (cria-tabuleiro)))
+(setf estado2 (resultado estado1 '(0 . #2A((T T T)(NIL T NIL)))))
 
 
 ;;; qualidade: estado -> inteiro
