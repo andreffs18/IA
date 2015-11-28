@@ -739,8 +739,8 @@
 )
 )
 
-(setf estado1 (make-estado :pontos 0 :pecas-por-colocar '(t i j t z j) :pecas-colocadas '() :tabuleiro (cria-tabuleiro)))
-(setf estado2 (resultado estado1 '(0 . #2A((T T T)(NIL T NIL)))))
+;(setf estado1 (make-estado :pontos 0 :pecas-por-colocar '(t i j t z j) :pecas-colocadas '() :tabuleiro (cria-tabuleiro)))
+;(setf estado2 (resultado estado1 '(0 . #2A((T T T)(NIL T NIL)))))
 
 
 ;;; qualidade: estado -> inteiro
