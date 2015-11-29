@@ -93,12 +93,13 @@
         )
     )
 
-(defun peca-dentro-limites (tabuleiro linha accao)
-            ;Verifica se a peca a ser colocada est dentro do limites do tabuleiro se nao estiver devolve NIL da funcao resultado
+
+
+(defun peca-dentro-limites (linha accao) ;Verifica se a peca a ser colocada est dentro do limites do tabuleiro se nao estiver devolve NIL da funcao resultado
 
     (let (
         (coluna (accao-coluna accao))  ; 0
-        (peca (accao-peca accao))
+
         (numlinhaspeca (first (array-dimensions (accao-peca accao))))
         (numcolunaspeca (second (array-dimensions (accao-peca accao))))
         )
@@ -711,7 +712,8 @@
                     ;Se nao detectar nenhuma colisao e estiver no fundo do tabuleiro (a peca) -> coloca-a nessa posicao
                     ((AND (not (detecta-colisao tabuleiro linha accao)) (eq linha 0)) (insere-peca tabuleiro peca linha coluna) (return)) ;ESTAVA AQUI O BUG TESTE 15
                     ;Se detectar uma colisao -> coloca a peca na posicao anterior
-                    ((AND (detecta-colisao tabuleiro linha accao) (peca-dentro-limites tabuleiro (1+ linha) accao)) (insere-peca tabuleiro peca (1+ linha) coluna) (return))
+                    ((AND (detecta-colisao tabuleiro linha accao) (peca-dentro-limites (1+ linha) accao)) (insere-peca tabuleiro peca (1+ linha) coluna) (return))
+                    ((AND (detecta-colisao tabuleiro linha accao) (not(peca-dentro-limites (1+ linha) accao))) (return-from resultado estado))
                     ;(t ())
                 )
             )
@@ -815,22 +817,22 @@ Algoritmos de Procura (2' parte do projecto)
 |#
 
 
-(setf t1 (cria-tabuleiro))
-(dotimes (coluna 9)
-    (tabuleiro-preenche! t1 0 (+ coluna 1))
-    (tabuleiro-preenche! t1 1 (+ coluna 1))
-    (tabuleiro-preenche! t1 2 (+ coluna 1))
-)
-(setf estado1 (make-estado :pontos 0
-                           :tabuleiro t1
-                           :pecas-colocadas ()
-                           :pecas-por-colocar '(o o o o o l l t t j j i i)))
+; (setf t1 (cria-tabuleiro))
+; (dotimes (coluna 9)
+;     (tabuleiro-preenche! t1 0 (+ coluna 1))
+;     (tabuleiro-preenche! t1 1 (+ coluna 1))
+;     (tabuleiro-preenche! t1 2 (+ coluna 1))
+; )
+; (setf estado1 (make-estado :pontos 0
+;                            :tabuleiro t1
+;                            :pecas-colocadas ()
+;                            :pecas-por-colocar '(o o o o o l l t t j j i i)))
 
-(setf problema1 (make-problema :estado-inicial estado1
-                               :solucao #'solucao
-                               :accoes #'accoes
-                               :resultado #'resultado
-                               :custo-caminho #'(lambda (x) 0)))
+; (setf problema1 (make-problema :estado-inicial estado1
+;                                :solucao #'solucao
+;                                :accoes #'accoes
+;                                :resultado #'resultado
+;                                :custo-caminho #'(lambda (x) 0)))
 
 ;(setf estado1 (make-estado :pontos 0 :tabuleiro (cria-tabuleiro) :pecas-colocadas () :pecas-por-colocar '(o l t s z)))
 ;(setf problema1 (make-problema :estado-inicial estado1 :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
@@ -856,7 +858,8 @@ Algoritmos de Procura (2' parte do projecto)
           (explorados (list (list)))
           (por-explorar (list (list problema nil nil)))
           (aux (list))
-          (newprob nil))
+          (newprob nil)
+          (FODASSE))
         ;(format t "por-explorar length ~d ~%" (list-length por-explorar))
         ;(format t "newprob ~d ~%" newprob)
 
@@ -939,6 +942,7 @@ Algoritmos de Procura (2' parte do projecto)
         )
         ;(print "acabou")
         (setf output (append (list (second aux)) output))
+        (setf output (rest output))
         (return-from procura-pp output)
     )
 
