@@ -264,8 +264,9 @@
     ; existirem pecas por colocar.
     ; (ter pontos nao interessa)
     (AND (zerop (length (estado-pecas-por-colocar estado)))  ;se nao tiver pecas por colocar
-         (not (tabuleiro-topo-preenchido-p (estado-tabuleiro estado)))) ;se o topo nao estiver preenchido
+         (not (tabuleiro-topo-preenchido-p (estado-tabuleiro estado)));se o topo nao estiver preenchido
     )
+)
 
 ;;; peca-i: {} -> lista de accoes
 ; (
@@ -859,7 +860,8 @@ Algoritmos de Procura (2' parte do projecto)
           (por-explorar (list (list problema nil nil)))
           (aux (list))
           (newprob nil)
-          (FODASSE))
+          (FODASSE)
+          (prob))
         ;(format t "por-explorar length ~d ~%" (list-length por-explorar))
         ;(format t "newprob ~d ~%" newprob)
 
@@ -867,7 +869,7 @@ Algoritmos de Procura (2' parte do projecto)
         (loop while (not (null por-explorar)) do
             ;(format t "(list-length por-explorar) ~d ~%" (list-length por-explorar))
             ;(format t "first por explorar ~d ~%" (first por-explorar))
-            (setf problema (first (first por-explorar)))
+            (setf prob (first (first por-explorar)))
             ;(print "depois problema")
             (setf explorados (append (list (first por-explorar)) explorados))
            ; (print "depois explorados")
@@ -878,27 +880,32 @@ Algoritmos de Procura (2' parte do projecto)
             ;(format t "problema e goal? ~d ~%" (funcall #'solucao (problema-estado-inicial problema)))
             ;(format t "~d ~%" (problema-estado-inicial problema))
             ;(format t "~d ~%" (tabuleiro->array (estado-tabuleiro (problema-estado-inicial problema))))
+            ;(print "ola")
+            ;(format t "(funcall (problema-solucao prob) (problema-estado-inicial prob): ~d ~%" (funcall (problema-solucao prob) (problema-estado-inicial prob)))
             (cond
-                ((funcall #'solucao (problema-estado-inicial problema))
+                ((funcall (problema-solucao prob) (problema-estado-inicial prob))
                     ;(format t "FODASSE ~d ~%" output)
                     (return))
                     ;(return-from procura-pp (problema-accoes problema)))
                 (t  ;(format t "loop over ~d acoes ~%" (list-length (funcall #'accoes (problema-estado-inicial problema))))
                     ;(print (list-length (funcall #'accoes (problema-estado-inicial problema))))
-                    
-                    (setf FODASSE (funcall #'accoes (problema-estado-inicial problema)))
+                    ;(print "antes accoes")
+                    ;(format t "prob: ~d ~%" (problema-accoes prob))
+                    (setf FODASSE (funcall (problema-accoes prob) (problema-estado-inicial prob)))
+                    ;(format t "fodasse: ~d ~%" FODASSE)
+                    ;(print "depois accoes")
                     ;(format t "FODASSE ~d ~%" FODASSE)
                     
                     (dolist (acao FODASSE)
                         ;(format t "#\"~d\" create new problem with this action~%" acao)
-                        (setf newprob (make-problema :estado-inicial (funcall #'resultado (problema-estado-inicial problema) acao)
-                                                           :solucao #'solucao
-                                                           :accoes (funcall #'accoes (problema-estado-inicial problema))
-                                                           :resultado #'resultado
-                                                           :custo-caminho #'qualidade))
+                        (setf newprob (make-problema :estado-inicial (funcall (problema-resultado prob) (problema-estado-inicial prob) acao)
+                                                           :solucao (problema-solucao prob)
+                                                           :accoes (problema-accoes prob)
+                                                           :resultado (problema-resultado prob)
+                                                           :custo-caminho (problema-custo-caminho prob)))
                         ;(format t "adding it to \"por-explorar\" list (~d to ~d) ~%" (list-length por-explorar) (1+ (list-length por-explorar)))
                         ;(print "aqui")
-                        (setf por-explorar (append (list (list newprob acao problema)) por-explorar))
+                        (setf por-explorar (append (list (list newprob acao prob)) por-explorar))
                     )
 
                     (if (null por-explorar) (return-from procura-pp nil)) ;Devolve NIL no caso de nao encontrar solucao e nao ter mais nada por explorar
