@@ -1023,7 +1023,11 @@ Algoritmos de Procura (2' parte do projecto)
 
         ; aux variables
         (infinty 100000000)
-        (count 0)
+        (h_cost 0)
+        (acoes)
+        (new-problem)
+        (tentative_g_score)
+        (children-node)
         (current-node nil)
         (lowest-node-val infinty) ; set this varibale as "infinty" to be changed for the lowers key in the f_score
     )
