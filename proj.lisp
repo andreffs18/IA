@@ -1145,6 +1145,7 @@ Algoritmos de Procura (2' parte do projecto)
         )
         (remhash current-node f_score)
         (remhash current-node g_score)
+        (return-from procura-A* nil)
     )
 )
 
@@ -1168,7 +1169,7 @@ Algoritmos de Procura (2' parte do projecto)
     	))
     	)
 
-    	(return-from procura-best (funcall procura-A* problema (funcall custo-oportunidade estado)))
+    	(return-from procura-best (funcall procura-A* problema #'(lambda (x) 0)))
     )
 )
 
