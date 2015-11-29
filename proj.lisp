@@ -785,8 +785,8 @@
     ; recebe estado e devolve inteiro que corresponde
     ; nao percebo
     (let ((efectivament-conseguido (estado-pontos estado))
-      (maximo-possivel 0)
-      (todas-pecas (estado-pecas-colocadas estado))
+          (maximo-possivel 0)
+          (todas-pecas (estado-pecas-colocadas estado))
           (custos (make-array (list 7) :initial-element 0)))  ; each position corresponds to a letter
         ; acumular todos os custos de todas as acoes ja feitas ate a data
         (dolist (peca todas-pecas)
