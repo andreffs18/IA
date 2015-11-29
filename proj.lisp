@@ -1149,6 +1149,7 @@ Algoritmos de Procura (2' parte do projecto)
         )
         (remhash current-node f_score)
         (remhash current-node g_score)
+        (return-from procura-A* nil)
     )
     (return-from procura-A* nil)
 )
@@ -1156,6 +1157,25 @@ Algoritmos de Procura (2' parte do projecto)
 ;;; procura-best: array x listapecas -> lista de acoes
 (defun procura-best (array lista-pecas)
     ;;;;;; este e o avaliado
+    (let (
+    	(tabuleiro (array->tabuleiro array))
+    	(estado (make-estado
+	        :pontos 0
+	        :pecas-por-colocar lista-pecas
+	        :pecas-colocadas (list)
+	        :tabuleiro tabuleiro
+        ))
+		(problema (make-problema
+			:estado-inicial estado
+	    	:solucao #'solucao
+	    	:accoes #'accoes
+	    	:resultado #'resultado
+	    	:custo-caminho #'qualidade
+    	))
+    	)
+
+    	(return-from procura-best (funcall procura-A* problema #'(lambda (x) 0)))
+    )
 )
 
 (load "utils.fas")
