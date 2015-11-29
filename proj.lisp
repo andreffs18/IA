@@ -713,8 +713,9 @@
                     ((AND (not (detecta-colisao tabuleiro linha accao)) (eq linha 0)) (insere-peca tabuleiro peca linha coluna) (return)) ;ESTAVA AQUI O BUG TESTE 15
                     ;Se detectar uma colisao -> coloca a peca na posicao anterior
                     ((AND (detecta-colisao tabuleiro linha accao) (peca-dentro-limites (1+ linha) accao)) (insere-peca tabuleiro peca (1+ linha) coluna) (return))
-                    ((AND (detecta-colisao tabuleiro linha accao) (not(peca-dentro-limites (1+ linha) accao))) (return-from resultado estado))
-                    ;(t ())
+           
+                    ;(t (return-from resultado estado))
+
                 )
             )
         )
@@ -729,7 +730,9 @@
         ;VERIFICA SE ACABOU O JOGO (TOPO PREENCHIDO)
         ;(format t "(estado-pecas-por-colocar new) = ~d ~%" (estado-pecas-por-colocar new))
         ;(format t "(estado-pecas-colocadas new) = ~d ~%" (estado-pecas-colocadas new))
-        ;(format t "(tabuleiro-topo-preenchido-p tabuleiro) = ~d ~%" (tabuleiro-topo-preenchido-p tabuleiro))
+        ;(format t "Tentei por peca: ~d " peca)
+       ; (format t "na coluna: ~d ~%" coluna)
+       ; (format t "(tabuleiro-topo-preenchido-p tabuleiro) = ~d ~%" (tabuleiro-topo-preenchido-p tabuleiro))
         (if (tabuleiro-topo-preenchido-p tabuleiro)
             (return-from resultado new) ;Se true: devolve o estado
             (progn ;Se nil: remove linhas e calc pontos calc pontos
@@ -900,6 +903,8 @@ Algoritmos de Procura (2' parte do projecto)
                         ;(print "aqui")
                         (setf por-explorar (append (list (list newprob acao problema)) por-explorar))
                     )
+
+                    (if (null por-explorar) (return-from procura-pp nil)) ;Devolve NIL no caso de nao encontrar solucao e nao ter mais nada por explorar
                    ; (format t "last fodasse ~d ~%" (last FODASSE))
                     ;(setf explorados (append explorados (last FODASSE)))
                     ;(format t "is bigger ? ~d ~%" (list-length output))
@@ -916,6 +921,7 @@ Algoritmos de Procura (2' parte do projecto)
         )
         
         ;(print "antes aux")
+        ;(format t "explorados: ~d ~%" explorados)
         (setf aux (first explorados))           ;lista
        ; (format t "---> ~d ~%" (list-length explorados))
         ;(print "depois aux")
@@ -942,7 +948,9 @@ Algoritmos de Procura (2' parte do projecto)
         )
         ;(print "acabou")
         (setf output (append (list (second aux)) output))
+        ;(format t "output: ~d ~%" output)
         (setf output (rest output))
+        ;(format t "output: ~d ~%" output)
         (return-from procura-pp output)
     )
 
@@ -973,8 +981,18 @@ Algoritmos de Procura (2' parte do projecto)
 ;(load (compile-file "utils.lisp"))
 
 
+;teste 14
 ; (setf t1 (cria-tabuleiro))
 ; (dotimes (coluna 9) (tabuleiro-preenche! t1 0 (+ coluna 1)) (tabuleiro-preenche! t1 1 (+ coluna 1)) (tabuleiro-preenche! t1 2 (+ coluna 1)))
 ; (setf prob1 (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(o o o o o l l t t j j i i)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
 ; (setf prob2 (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(i)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
 ; (setf prob3 (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(i)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
+
+;teste 15
+; (setf t1 (cria-tabuleiro))
+; (dotimes (linha 17) (dotimes (coluna 8) (tabuleiro-preenche! t1 linha (+ coluna 2))))
+; (procura-pp (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(o l t s z)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
+
+; (setf t2 (cria-tabuleiro))
+; (dotimes (linha 17) (dotimes (coluna 10) (tabuleiro-preenche! t2 linha coluna)))
+; (procura-pp (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t2 :pecas-colocadas () :pecas-por-colocar '(o)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
