@@ -595,6 +595,7 @@
         ((eq (first (estado-pecas-por-colocar estado)) 't) (peca-t))
         (t nil)
     )
+    ;
 )
 
 ;;; detecta-colisao: tabuleiro x linha x accao-> logico
@@ -832,8 +833,8 @@ Algoritmos de Procura (2' parte do projecto)
 ;                                :resultado #'resultado
 ;                                :custo-caminho #'(lambda (x) 0)))
 
-;(setf estado1 (make-estado :pontos 0 :tabuleiro (cria-tabuleiro) :pecas-colocadas () :pecas-por-colocar '(o l t s z)))
-;(setf problema1 (make-problema :estado-inicial estado1 :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
+(setf estado1 (make-estado :pontos 0 :tabuleiro (cria-tabuleiro) :pecas-colocadas () :pecas-por-colocar '(o l t s z)))
+(setf problema1 (make-problema :estado-inicial estado1 :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
 ;;; procura-pp: problema -> lista de acoes
 (defun procura-pp (problema)
     ; usa procura em profundidade primeiro em arvore
@@ -965,7 +966,31 @@ Algoritmos de Procura (2' parte do projecto)
     )
 )
 
+(defstruct node
+    problema
+    acao)
 
+(defun cria-node (problema &optional acao)
+    (make-node :problema problema :acao acao)
+)
+
+(defun constroi-caminho (path-hash current)
+    (let ((path (list))
+          (next current)
+          (next-action nil))
+        (setf next-action (node-acao next))
+        (loop while (not (null next-action)) do
+            (setf path (append path (list next-action)))
+            (setf next (gethash next path-hash))
+            (setf next-action (node-acao next))
+        )
+        (return-from constroi-caminho path)
+    )
+)
+
+(defun lol (path-hash current)
+    (maphash #'(lambda (key val) (format t "~d :  ~d ~%" key val)) path-hash)
+)
 ;;; procura-A*: problema x heuristica -> lista de acoes
 (defun procura-A* (problema heuristica)
     ; usa o algo procura A* em arvore para determinar a seq de acoes
@@ -977,8 +1002,105 @@ Algoritmos de Procura (2' parte do projecto)
     ; deve ser escolhido o ultimo a ser colocado
     ; generico.. nao so para o tetris mas para qualuer problema
     ; check pseuso code here -> https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
-    (declare (ignore problema heuristica))
+    (let* (
+        (startnode (cria-node problema))
+
+        (closeSet (list))
+        (openSet (list startnode))
+
+        (cameFrom (make-hash-table))
+        (g_score (make-hash-table))
+        (f_score (make-hash-table))
+
+        ; aux variables
+        (infinty 100000000)
+        (count 0)
+        (current-node nil)
+        (lowest-node-val infinty) ; set this varibale as "infinty" to be changed for the lowers key in the f_score
+    )
+
+    (setf (gethash startnode g_score) 0)
+    (setf h_cost (funcall heuristica (problema-estado-inicial (node-problema startnode))))
+    (setf (gethash startnode f_score) (+ (gethash startnode g_score) h_cost))
+    (format t "is open set not empty? = ~d (length = ~d)~%" (not (eq 0 (list-length openSet))) (list-length openSet))
+    (loop while (not (eq 0 (list-length openSet))) do
+        ; get the lowers node from open set with lowest fscore
+        (format t "get lowest node from open set~%")
+        (setf current-node nil)
+        (setf lowest-node-val infinty)
+        (maphash #'(lambda (key val)
+            (format t "val = ~d | lowest-node-val = ~d | (<= val lowest-node-val) = ~d ~%" val lowest-node-val (<= val lowest-node-val))
+            (if (<= val lowest-node-val)
+                (progn
+                    (setf current-node key)
+                    (setf lowest-node-val val)
+                )
+            ))
+            f_score)
+
+        ; check if this node is the goal
+        (format t "is current-node the goal one? ~d ~%" (funcall #'solucao (problema-estado-inicial (node-problema current-node))))
+        (if (funcall #'solucao (problema-estado-inicial (node-problema current-node)))
+            (return-from procura-A* (constroi-caminho cameFrom current-node))
+        )
+
+
+        (format t "remove current-node from open set~%(openSet before size = ~d)~%" (list-length openSet))
+        ; remove node from open set
+        (setf openSet (remove current-node openSet))
+        (format t "(openSet after size = ~d)~%add current-node to close set~%(closeSet before size = ~d)~%" (list-length openSet) (list-length closeSet))
+        ; and add it to the close set
+        (push current-node closeSet)
+        (format t "(closeSet after size = ~d)~%" (list-length closeSet))
+
+        ; generate children
+        (setf acoes (funcall #'accoes (problema-estado-inicial (node-problema current-node))))
+        (format t "~d Possiveis acoes ~%" (list-length acoes))
+        (dolist (acao acoes)
+            ;(format t "> tamanho da child should be 2 = ~d ~%"  (list-length child))
+            ;(format t "> fist should be problema and second list = ~d | ~d ~%" (type-of (first child)) (type-of (second child)))
+            (setf new-problem (make-problema :estado-inicial (funcall #'resultado (problema-estado-inicial (node-problema current-node)) acao)
+                                             :accoes (funcall #'accoes (problema-estado-inicial (node-problema current-node)))
+                                             :solucao #'solucao :resultado #'resultado :custo-caminho #'qualidade))
+            (setf children-node (cria-node new-problem acao))
+            (setf (gethash children-node f_score) infinty)
+            (setf (gethash children-node g_score) infinty)
+            ; se esta nova child ainda nao foi visitada, entao adiciona a priority queue
+            (if (not (member children-node closeSet))
+                (progn
+                    (setf tentative_g_score (1+ (gethash current-node g_score)))
+
+
+                    (if (not (member children-node openSet))
+                        (setf openSet (append openSet (list children-node)))
+                    )
+                    (cond
+                        ((>= tentative_g_score (gethash children-node g_score)) ())
+                        (t
+                            (setf (gethash children-node cameFrom) current-node)
+                            (format t "children g_score ~d -> ~d ~%" (gethash children-node g_score) tentative_g_score)
+                            (setf (gethash children-node g_score) tentative_g_score)
+                            (setf h_cost (funcall heuristica (problema-estado-inicial (node-problema children-node))))
+                            (format t "children f_score ~d -> ~d + ~d ~%" (gethash children-node f_score) (gethash children-node g_score) h_cost)
+                            (setf (gethash children-node f_score) (+ (gethash children-node g_score) h_cost))
+                        )
+                    )
+                )
+            )
+        )
+        (remhash current-node f_score)
+        (remhash current-node g_score)
+    ))
 )
+
+;;; Teste 22 E2
+;;; procura A* num tabuleiro quase cheio usando custo oportunidade
+;;deve retornar IGNORE
+(setf t1 (cria-tabuleiro))
+;;deve retornar IGNORE
+(dotimes (linha 16) (dotimes (coluna 7) (tabuleiro-preenche! t1 linha coluna)))
+;;deve retornar uma lista de accoes (ver ficheiro output)
+
 
 ;;; procura-best: array x listapecas -> lista de acoes
 (defun procura-best (array lista-pecas)
