@@ -806,7 +806,7 @@ Algoritmos de Procura (2' parte do projecto)
                                :custo-caminho #'(lambda (x) 0)))
 
 ;(setf estado1 (make-estado :pontos 0 :tabuleiro (cria-tabuleiro) :pecas-colocadas () :pecas-por-colocar '(o l t s z)))
-;(setf problema1 (make-problema :estado-inicial estado1 :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
+(setf problema1 (make-problema :estado-inicial estado1 :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
 ;;; procura-pp: problema -> lista de acoes
 (defun procura-pp (problema)
     ; usa procura em profundidade primeiro em arvore
@@ -825,53 +825,74 @@ Algoritmos de Procura (2' parte do projecto)
         ;     :pecas-por-colocar '(o l t s z)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
     ;(print (problema-estado-inicial problema))
 
-    (let ((output (list))
-          (por-explorar (list problema))
-          (newprob nil))
+    (let (
+        (por-explorar (list (list problema 'nil)))
+        (output (list))
+        )
         ;(format t "por-explorar length ~d ~%" (list-length por-explorar))
         ;(format t "newprob ~d ~%" newprob)
-
         ;(format t "(not (null por-explorar) ~d ~%" (not (null por-explorar)))
+        ;(format t "(list-length por-explorar) ~d ~%" (list-length por-explorar))
+        ;(format t "problema e goal? ~d ~%" (funcall #'solucao (problema-estado-inicial problema)))
+        ;(format t "~d ~%" (problema-estado-inicial problema))
+        ;(format t "~d ~%" (tabuleiro->array (estado-tabuleiro (problema-estado-inicial problema))))
+        ;(format t "(list-length por-explorar) ~d ~%" (list-length por-explorar))
+        ;(format t "FODASSE ~d ~%" output)
+        ;
+        ;(format t "#\"~d\" create new problem with this action~%" acao)
+        ;(format t "adding it to \"por-explorar\" list (~d to ~d) ~%" (list-length por-explorar) (1+ (list-length por-explorar)))
+        ; (loop while (not (funcall #'solucao (problema-estado-inicial (first por-explorar)))) do
+        ;     ; nao e objectivo, portanto vou marcar como expandido e exploara
+        ;     ; (setf por-explorar (rest por-explorar))
+        ;     (setf explorados (append (first por-explorar) explorados))
+        ;     (setf acoes (funcall #'accoes (problema-estado-inicial (first explorados))))
+        ;     (dolist (acao acoes)
+        ;         (setf novo-problema (list (make-problema :estado-inicial (funcall #'resultado (problema-estado-inicial problema) acao)
+        ;                                                  :solucao #'solucao
+        ;                                                  :accoes (funcall #'accoes (problema-estado-inicial problema))
+        ;                                                  :resultado #'resultado
+        ;                                                  :custo-caminho #'qualidade)))
+
+        ;         (setf por-explorar (append novo-problema por-explorar))
+        ;     )
+        ; )
+        ; ; e objectivo, cirar lista de acoes
+
+        (format t "Before while loop (not (null por-explorar)) = ~d ~%" (not (null por-explorar)))
         (loop while (not (null por-explorar)) do
-            (format t "(list-length por-explorar) ~d ~%" (list-length por-explorar))
-
-            (setf problema (first por-explorar))
+            ;(format t "Inside while loop~%(car (first por-explorar)) ~d | (cdr (first por-explorar)) ~d ~%" (car (first por-explorar)) (cdr (first por-explorar)))
+            (format t "outravez dentro ~%")
+            (setf problema (first (first por-explorar)))
+            (setf action (second (first por-explorar)))
+            (format t "problema redefiend ~%")
             (setf por-explorar (rest por-explorar))
-
-            (format t "(list-length por-explorar) ~d ~%" (list-length por-explorar))
-
-            (format t "problema e goal? ~d ~%" (funcall #'solucao (problema-estado-inicial problema)))
-            (format t "~d ~%" (problema-estado-inicial problema))
-            (format t "~d ~%" (tabuleiro->array (estado-tabuleiro (problema-estado-inicial problema))))
+            (format t "por-explorar redefiend ~%")
+            (format t "GOAL? = ~d ~%" (funcall #'solucao (problema-estado-inicial problema)))
             (cond
                 ((funcall #'solucao (problema-estado-inicial problema))
-                    (format t "FODASSE ~d ~%" output)
+                    (setf output (append output (second (first por-explorar))))
+                    (dolist (n por-explorar)
+                        (format t "print acao (second n) = ~d ~%" (second n))
+                        (setf output (append (list (second n)) output))
+                    )
                     (return-from procura-pp output))
-                    ;(return-from procura-pp (problema-accoes problema)))
-                (t  (format t "loop over ~d acoes ~%" (list-length (funcall #'accoes (problema-estado-inicial problema))))
-                    ;(print (list-length (funcall #'accoes (problema-estado-inicial problema))))
-                    (setf FODASSE (funcall #'accoes (problema-estado-inicial problema)))
-                    (format t "FODASSE ~d ~%" FODASSE)
-                    (dolist (acao FODASSE)
-                        (format t "#\"~d\" create new problem with this action~%" acao)
-                        (setf newprob (list (make-problema :estado-inicial (funcall #'resultado (problema-estado-inicial problema) acao)
+                (t
+                    (format t "loop over ~d acoes ~%" (list-length (funcall #'accoes (problema-estado-inicial problema))))
+                    (setf acoes (funcall #'accoes (problema-estado-inicial problema)))
+                    (dolist (acao acoes)
+                        (setf novo-problema (make-problema :estado-inicial (funcall #'resultado (problema-estado-inicial problema) acao)
                                                            :solucao #'solucao
                                                            :accoes (funcall #'accoes (problema-estado-inicial problema))
                                                            :resultado #'resultado
-                                                           :custo-caminho #'qualidade)))
-                        (format t "adding it to \"por-explorar\" list (~d to ~d) ~%" (list-length por-explorar) (1+ (list-length por-explorar)))
-                        (setf por-explorar (append newprob por-explorar))
+                                                           :custo-caminho #'qualidade))
+                        (format t "saving acao ~d ~%" acao)
+                        (setf por-explorar (append (list (list novo-problema acao)) por-explorar))
                     )
-                    (format t "last fodasse ~d ~%" (last FODASSE))
-                    (setf output (append output (last FODASSE)))
-                    (format t "is bigger ? ~d ~%" (list-length output))
+                    (print "out of dolist")
                 )
             )
-            ;(print "(not (null por-explorar)~%")
-            ;(print (not (null por-explorar)))
         )
     )
-
 )
 
 
