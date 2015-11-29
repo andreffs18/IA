@@ -887,7 +887,7 @@ Algoritmos de Procura (2' parte do projecto)
         ; )
         ; ; e objectivo, cirar lista de acoes
 
-        (format t "Before while loop (not (null por-explorar)) = ~d ~%" (not (null por-explorar)))
+        ;(format t "Before while loop (not (null por-explorar)) = ~d ~%" (not (null por-explorar)))
         (loop while (not (null por-explorar)) do
 
             ;(format t "(list-length por-explorar) ~d ~%" (list-length por-explorar))
