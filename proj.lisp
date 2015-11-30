@@ -1061,7 +1061,7 @@ Algoritmos de Procura (2' parte do projecto)
     ;(format t "is open set not empty? = ~d (length = ~d)~%" (not (eq 0 (list-length openSet))) (list-length openSet))
     (loop while (not (eq 0 (list-length openSet))) do
         ; get the lowers node from open set with lowest fscore
-        ;(format t "get lowest node from open set~%")
+        
         (setf current-node nil)
         (setf lowest-node-val infinty)
         (dolist (abc openSet)
@@ -1073,15 +1073,16 @@ Algoritmos de Procura (2' parte do projecto)
                 )
             )
         )
+        ; (format t "get lowest node from open set ~d ~%" current-node)
         ; (maphash #'(lambda (key val)
-            ; ;(format t "val = ~d | lowest-node-val = ~d | (<= val lowest-node-val) = ~d ~%" val lowest-node-val (<= val lowest-node-val))
-            ; (if (<= val lowest-node-val)
-            ;     (progn
-            ;         (setf current-node key)
-            ;         (setf lowest-node-val val)
-            ;     )
-            ; ))
-            ; f_score)
+        ;     ;(format t "val = ~d | lowest-node-val = ~d | (<= val lowest-node-val) = ~d ~%" val lowest-node-val (<= val lowest-node-val))
+        ;     (if (<= val lowest-node-val)
+        ;         (progn
+        ;             (setf current-node key)
+        ;             (setf lowest-node-val val)
+        ;         )
+        ;     ))
+        ;     f_score)
 
         ; check if this node is the goal
         ;(format t "is current-node the goal one? ~d ~%" (funcall (problema-solucao (node-problema current-node)) (problema-estado-inicial (node-problema current-node))))
@@ -1122,7 +1123,8 @@ Algoritmos de Procura (2' parte do projecto)
             (if (not (member children-node closeSet))
                 (progn
                     ;(setf tentative_g_score (1+ (gethash current-node g_score)))
-                    (setf tentative_g_score (+ (gethash current-node g_score) (funcall (problema-custo-caminho (node-problema children-node)) (problema-estado-inicial (node-problema children-node)))))
+                    (setf tentative_g_score (+ (gethash current-node g_score) 
+                        (funcall (problema-custo-caminho (node-problema children-node)) (problema-estado-inicial (node-problema children-node)))))
 
 
                     (if (not (member children-node openSet))
@@ -1145,12 +1147,15 @@ Algoritmos de Procura (2' parte do projecto)
                     )
                 )
             )
-            )
         )
+        ;(format t "(hash-table-count f_score) = ~d ~%" (hash-table-count f_score))
         (remhash current-node f_score)
+        ;(format t "(hash-table-count f_score) = ~d ~%" (hash-table-count f_score))
         (remhash current-node g_score)
     )
-    (return-from procura-A* nil)
+    (return-from procura-A* nil) 
+    )
+    
 )
 
 ;;; procura-best: array x listapecas -> lista de acoes
