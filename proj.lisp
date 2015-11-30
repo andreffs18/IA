@@ -1174,8 +1174,8 @@ Algoritmos de Procura (2' parte do projecto)
     	)
 
 
-    	;(return-from procura-best (procura-A* problema #'qualidade))
-        (return-from procura-best (procura-A* problema #'custo-oportunidade))
+    	(return-from procura-best (procura-A* problema #'qualidade))
+        ;(return-from procura-best (procura-A* problema #'custo-oportunidade))
         ;(return-from procura-best (procura-pp problema))
 
     )
