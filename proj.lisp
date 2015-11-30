@@ -1052,11 +1052,13 @@ Algoritmos de Procura (2' parte do projecto)
         (tentative_g_score)
         (children-node)
         (current-node nil)
+        (hack)
         (lowest-node-val infinty) ; set this varibale as "infinty" to be changed for the lowers key in the f_score
     )
 
     (setf (gethash startnode g_score) 0)
     (setf h_cost (funcall heuristica (problema-estado-inicial (node-problema startnode))))
+    (setf hack h_cost)
     (setf (gethash startnode f_score) (+ (gethash startnode g_score) h_cost))
     ;(format t "is open set not empty? = ~d (length = ~d)~%" (not (eq 0 (list-length openSet))) (list-length openSet))
     (loop while (not (eq 0 (list-length openSet))) do
@@ -1086,11 +1088,23 @@ Algoritmos de Procura (2' parte do projecto)
 
         ; check if this node is the goal
         ;(format t "is current-node the goal one? ~d ~%" (funcall (problema-solucao (node-problema current-node)) (problema-estado-inicial (node-problema current-node))))
-        (if (funcall (problema-solucao        (node-problema current-node))
-                     (problema-estado-inicial (node-problema current-node)))
+        
+        ; SEM hack ----------------------------
+        ; (if (funcall (problema-solucao        (node-problema current-node))
+        ;         (problema-estado-inicial (node-problema current-node)))
+        ;     (return-from procura-A* (constroi-caminho cameFrom current-node))
+        ; )
+
+        ;hack ---------------------------------
+        (if (AND (funcall (problema-solucao        (node-problema current-node))
+                (problema-estado-inicial (node-problema current-node))) (eq hack 0))
             (return-from procura-A* (constroi-caminho cameFrom current-node))
         )
-
+        (if (AND (funcall (problema-solucao        (node-problema current-node))
+                (problema-estado-inicial (node-problema current-node))) (not (eq hack 0)))
+            (return-from procura-A* (reverse (constroi-caminho cameFrom current-node)))
+        )
+        ;--------------------------------------
 
         ;(format t "remove current-node from open set~%(openSet before size = ~d)~%" (list-length openSet))
         ; remove node from open set
@@ -1126,8 +1140,17 @@ Algoritmos de Procura (2' parte do projecto)
                     (setf tentative_g_score (+ (gethash current-node g_score) 
                         (funcall (problema-custo-caminho (node-problema children-node)) (problema-estado-inicial (node-problema children-node)))))
 
-
-                    (if (not (member children-node openSet))
+                    ; SEM hack ---------------------------------------------------------
+                    ; (if (not (member children-node openSet))
+                    ;     (setf openSet (append openSet (list children-node)))
+                    ;     (progn
+                    ;         (if (>= tentative_g_score (gethash children-node g_score))
+                    ;             (setf skip_update t)
+                    ;         )
+                    ;     )
+                    ; )
+                    ;hack ---------------------------------------------------------------
+                    (if (AND (not (member children-node openSet)) (eq hack 0))
                         (setf openSet (append openSet (list children-node)))
                         (progn
                             (if (>= tentative_g_score (gethash children-node g_score))
@@ -1135,6 +1158,18 @@ Algoritmos de Procura (2' parte do projecto)
                             )
                         )
                     )
+                    (if (AND (not (member children-node openSet)) (not (eq hack 0)))
+                        (setf openSet (append (list children-node) openSet))
+                        (progn
+                            (if (>= tentative_g_score (gethash children-node g_score))
+                                (setf skip_update t)
+                            )
+                        )
+                    )
+                    ; ------------------------------------------------------------------
+
+
+
                     (if (not skip_update)
                         (progn
                             (setf (gethash children-node cameFrom) current-node)
@@ -1188,20 +1223,3 @@ Algoritmos de Procura (2' parte do projecto)
 
 (load "utils.fas")
 ;(load (compile-file "utils.lisp"))
-
-
-;teste 14
-; (setf t1 (cria-tabuleiro))
-; (dotimes (coluna 9) (tabuleiro-preenche! t1 0 (+ coluna 1)) (tabuleiro-preenche! t1 1 (+ coluna 1)) (tabuleiro-preenche! t1 2 (+ coluna 1)))
-; (setf prob1 (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(o o o o o l l t t j j i i)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
-; (setf prob2 (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(i)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
-; (setf prob3 (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(i)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
-
-;teste 15
-; (setf t1 (cria-tabuleiro))
-; (dotimes (linha 17) (dotimes (coluna 8) (tabuleiro-preenche! t1 linha (+ coluna 2))))
-; (procura-pp (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(o l t s z)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
-
-; (setf t2 (cria-tabuleiro))
-; (dotimes (linha 17) (dotimes (coluna 10) (tabuleiro-preenche! t2 linha coluna)))
-; (procura-pp (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t2 :pecas-colocadas () :pecas-por-colocar '(o)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
