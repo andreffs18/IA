@@ -1169,12 +1169,15 @@ Algoritmos de Procura (2' parte do projecto)
 	    	:solucao #'solucao
 	    	:accoes #'accoes
 	    	:resultado #'resultado
-	    	:custo-caminho #'qualidade
+	    	:custo-caminho #'custo-oportunidade
     	))
     	)
 
-    	;(return-from procura-best (procura-A* problema #'(lambda (x) 0)))
-        (return-from procura-best (procura-A* problema (qualidade estado)))
+
+    	;(return-from procura-best (procura-A* problema #'qualidade))
+        (return-from procura-best (procura-A* problema #'custo-oportunidade))
+        ;(return-from procura-best (procura-pp problema))
+
     )
 )
 
