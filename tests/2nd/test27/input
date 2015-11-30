@@ -1,0 +1,18 @@
+;;; teste 27 E2, testa abstracao de dados do tipo tabuleiro, na funcoes procura-A*
+(make-package 'teste)
+(in-package teste)
+;; o projecto nao pode ser compilado, pois iria ter problemas em redefinir estruturas compiladas em lisp
+;; retorna T
+(load "projecto-alunos.lisp") 
+;; carrega um tipo tabuleiro mt particular, fazendo override as definicoes dos alunos
+;; retorna T
+(load "TAI-tabuleiro.lisp")
+;; carrega o ficheiro de utils nao compilado
+;; retorna T
+(load "utils.lisp")
+;;deve retornar IGNORE
+(ignore-value (setf t1 (cria-tabuleiro)))
+;;deve retornar IGNORE
+(ignore-value (dotimes (linha 10) (dotimes (coluna 8) (tabuleiro-preenche! t1 linha coluna))))
+;;deve retornar uma lista de accoes (ver ficheiro output)
+(procura-A* (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(l j)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'qualidade) #'(lambda (x) 0))

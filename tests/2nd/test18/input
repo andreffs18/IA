@@ -1,0 +1,8 @@
+;;; Teste 18 E2
+;;; procura A* num tabuleiro vazio. Nao e possivel fazer nenhuma linha, por isso aqui testamos apenas se trabalham com a lista de abertos/fronteira de acordo com a ordem especificada
+;;deve retornar IGNORE
+(ignore-value (setf t1 (cria-tabuleiro)))
+;;deve retornar uma lista de accoes (ver ficheiro output)
+(procura-A* (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(t s)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'qualidade) #'(lambda (x) 0))
+;;deve retornar uma lista de accoes (ver ficheiro output)
+(procura-A* (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(l i)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'custo-oportunidade) #'(lambda (x) 0))

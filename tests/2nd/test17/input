@@ -1,0 +1,8 @@
+;;; Teste 17 E2
+;;; procura A* num tabuleiro onde nao existe solucao
+;;deve retornar IGNORE
+(ignore-value (setf t1 (cria-tabuleiro)))
+;;deve retornar IGNORE
+(ignore-value (dotimes (linha 17) (dotimes (coluna 9) (tabuleiro-preenche! t1 linha coluna))))
+;;deve retornar NIL (nao existe solucao)
+(procura-A* (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(t s)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'qualidade) #'(lambda (e) 0))
