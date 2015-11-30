@@ -1164,24 +1164,24 @@ Algoritmos de Procura (2' parte do projecto)
 (defun procura-best (array lista-pecas)
     ;;;;;; este e o avaliado
     (let* (
-    	(tabuleiro (array->tabuleiro array))
-    	(estado (make-estado
-	        :pontos 0
-	        :pecas-por-colocar lista-pecas
-	        :pecas-colocadas (list)
-	        :tabuleiro tabuleiro
+        (tabuleiro (array->tabuleiro array))
+        (estado (make-estado
+            :pontos 0
+            :pecas-por-colocar lista-pecas
+            :pecas-colocadas (list)
+            :tabuleiro tabuleiro
         ))
-		(problema (make-problema
-			:estado-inicial estado
-	    	:solucao #'solucao
-	    	:accoes #'accoes
-	    	:resultado #'resultado
-	    	:custo-caminho #'custo-oportunidade
-    	))
-    	)
+        (problema (make-problema
+            :estado-inicial estado
+            :solucao #'solucao
+            :accoes #'accoes
+            :resultado #'resultado
+            :custo-caminho #'custo-oportunidade
+        ))
+        )
 
-    	;(return-from procura-best (procura-A* problema #'qualidade))
-        (return-from procura-best (procura-A* problema #'custo-oportunidade))
+        ;(return-from procura-best (procura-A* problema #'qualidade))
+        (return-from procura-best (procura-A* problema #'qualidade))
         ;(return-from procura-best (procura-pp problema))
     )
 )
