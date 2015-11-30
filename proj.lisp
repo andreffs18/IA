@@ -563,20 +563,20 @@
     ; passando para t3 -> t2 -> t1
     (let (( lista (list) ))
         (dotimes (n (- T-NCOLUNAS 2))
-         (setf lista (append lista (list (cria-accao n peca-t0))))
-         )
-        (dotimes (n (1- T-NCOLUNAS))
-         (setf lista (append lista (list (cria-accao n peca-t1))))
-         )
-        (dotimes (n (- T-NCOLUNAS 2))
-         (setf lista (append lista (list (cria-accao n peca-t2))))
-         )
-        (dotimes (n (1- T-NCOLUNAS) lista)
-         (setf lista (append lista (list (cria-accao n peca-t3))))
-         )
-
+           (setf lista (append lista (list (cria-accao n peca-t0))))
         )
+        (dotimes (n (1- T-NCOLUNAS))
+           (setf lista (append lista (list (cria-accao n peca-t1))))
+        )
+        (dotimes (n (- T-NCOLUNAS 2))
+           (setf lista (append lista (list (cria-accao n peca-t2))))
+        )
+        (dotimes (n (1- T-NCOLUNAS) lista)
+           (setf lista (append lista (list (cria-accao n peca-t3))))
+        )
+
     )
+)
 
 ;;; accoes: estado -> lista de acoes
 (defun accoes (estado)
