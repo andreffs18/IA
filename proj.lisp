@@ -1173,7 +1173,8 @@ Algoritmos de Procura (2' parte do projecto)
     	))
     	)
 
-    	(return-from procura-best (procura-A* problema #'(lambda (x) 0)))
+    	;(return-from procura-best (procura-A* problema #'(lambda (x) 0)))
+        (return-from procura-best (procura-A* problema (qualidade estado)))
     )
 )
 
