@@ -93,11 +93,13 @@
         )
     )
 
-(defun peca-dentro-limites (linha accao)
-            ;Verifica se a peca a ser colocada est dentro do limites do tabuleiro se nao estiver devolve NIL da funcao resultado
+
+
+(defun peca-dentro-limites (linha accao) ;Verifica se a peca a ser colocada est dentro do limites do tabuleiro se nao estiver devolve NIL da funcao resultado
 
     (let (
         (coluna (accao-coluna accao))  ; 0
+
         (numlinhaspeca (first (array-dimensions (accao-peca accao))))
         (numcolunaspeca (second (array-dimensions (accao-peca accao))))
         )
@@ -120,8 +122,7 @@
     ; para ficar preenchido
     ; valida de os valores da nlinha e ncoluna sao validos
     ; (se estao dentro dos limites do campo)
-    ; nao interessa o valor devolvido (deve devolver nada)??
-    ;(if (AND (AND (>= nlinha 0) (< nlinha T-NLINHAS)) (AND (>= ncoluna 0) (< ncoluna T-NCOLUNAS))) (setf (aref tabuleiro nlinha ncoluna) T) )
+    ; nao interessa o valor devolvido
     (cond
         ((not (dentro-limites nlinha ncoluna)) nil)
         (t (setf (gethash (cons nlinha ncoluna) tabuleiro) t))
@@ -151,7 +152,6 @@
 (defun tabuleiro-topo-preenchido-p (tabuleiro)
     ; devolve true se existir uma coluna preenchida
     ; na linha 17 do tabuleiro
-    ; ALTEREI PARA DEVOLVER T QUANDO ENCONTRA POSICAO PREENCHIDA E E DEVOLVER NIL CASO NAO ENCONTRE
     (dotimes (col T-NCOLUNAS nil)
         ;(format t "(aref tabuleiro (1- T-NLINHAS) col) = ~d ~%" (aref tabuleiro (1- T-NLINHAS) col))
         (if (tabuleiro-preenchido-p tabuleiro (1- T-NLINHAS) col)
@@ -563,20 +563,20 @@
     ; passando para t3 -> t2 -> t1
     (let (( lista (list) ))
         (dotimes (n (- T-NCOLUNAS 2))
-           (setf lista (append lista (list (cria-accao n peca-t0))))
-        )
+         (setf lista (append lista (list (cria-accao n peca-t0))))
+         )
         (dotimes (n (1- T-NCOLUNAS))
-           (setf lista (append lista (list (cria-accao n peca-t1))))
-        )
+         (setf lista (append lista (list (cria-accao n peca-t1))))
+         )
         (dotimes (n (- T-NCOLUNAS 2))
-           (setf lista (append lista (list (cria-accao n peca-t2))))
-        )
+         (setf lista (append lista (list (cria-accao n peca-t2))))
+         )
         (dotimes (n (1- T-NCOLUNAS) lista)
-           (setf lista (append lista (list (cria-accao n peca-t3))))
-        )
+         (setf lista (append lista (list (cria-accao n peca-t3))))
+         )
 
+        )
     )
-)
 
 ;;; accoes: estado -> lista de acoes
 (defun accoes (estado)
@@ -605,21 +605,17 @@
     ; devolve
     ; true caso a peca esteja a coincidir com alguma posicao do tabuleiro(True)
     ; false caso a peca nao coincida com nenhuma posicao preenchida do tabuleiro
-    ; METI COMENTARIOS PARA VERES ISTO A FUNCIONARRR!!! TENS UM TEST CASE EM CIMA.  SO DESCOMENTAR E CORRER
     (let ((ncoluna (accao-coluna accao))
           (peca (accao-peca accao))
           (numlinhaspeca (first (array-dimensions (accao-peca accao))))
           (numcolunaspeca (second (array-dimensions (accao-peca accao))))
          )
-        ;(format t "ncoluna ~d ~%" ncoluna)
-        ;(format t "numlinhaspeca ~d ~%" numlinhaspeca)
-        ;(format t "numcolunaspeca ~d ~%" numcolunaspeca)
+
         (dotimes (l numlinhaspeca nil)
             (dotimes (c numcolunaspeca)
                 ;#1 verifica se a posicao que se ira comparar esta dentro dos limites do tabuleiro
                 ;#2 verifica se alguma posicao da peca (a True) coincide com alguma posicao do tabuleiro (a True)
                 ;#3 se a peca esta preenchida nessa posicao
-                ;(format t "l=~d, c=~d | dentro-limites=~d | tabuleiro-preenchido=~d ~%" l c (dentro-limites (+ nlinha l) (+ ncoluna c)) (tabuleiro-preenchido-p tabuleiro (+ nlinha l) (+ ncoluna c)))
                 (if (AND
                         (dentro-limites (+ nlinha l) (+ ncoluna c))  ; #1
                         (tabuleiro-preenchido-p tabuleiro (+ nlinha l) (+ ncoluna c)) ; #2
@@ -655,15 +651,9 @@
 ;;; resultado: estado x accao -> estado
 (defun resultado (estado accao)
     ; recebe estado e acao e devolve o novo estado que
-    ; resultda de aplica a acao ao estado original
-    ; NAO e destrutivo, ou seja, novo obejcto e gerado
-    ; pseudo algo:
-    ; deve actualizar as listas de pecas,
-    ; colocar a peca especificada pela accao na posicao correcta
-    ; depois de colocada a peca,
-    ; verifica se o topo do tabuleiro esta preenchido;
-    ; caso sim: nao se removem linhas e devolve-se o estado
-    ; case no: removem-se as linhas e calculam-se os pontos obtidos
+    ; resulta de aplicar a acao ao estado original
+    ; NAO e destrutivo, ou seja, novo objecto e gerado
+
     (let* (
         (new (copia-estado estado))
         (tabuleiro (estado-tabuleiro new))
@@ -695,17 +685,9 @@
         )
 
 
-
-        ;(format t "alturacoluna = ~d ~%" alturacoluna)
-        ;(format t "colunamaior = ~d ~%" colunamaior)
-
         ;CICLO DE DECREMENTO DAS POSICOES DA PECA NA TABELA ATE COLISAO
         (loop for linha from alturacoluna downto 0 do
             (progn
-                ;(format t "inside loop (linha) = ~d ~%" linha)
-                ;(format t "inside loop (coluna) = ~d ~%" coluna)
-                ;(format t "(detecta-colisao tabuleiro linha accao) = ~d ~%" (detecta-colisao tabuleiro linha accao))
-                ;(format t "(eq linha 0) = ~d ~%" (eq linha 0))
 
                 (cond
 
@@ -713,10 +695,12 @@
                     ((AND (not (detecta-colisao tabuleiro linha accao)) (eq linha 0)) (insere-peca tabuleiro peca linha coluna) (return)) ;ESTAVA AQUI O BUG TESTE 15
                     ;Se detectar uma colisao -> coloca a peca na posicao anterior
                     ((AND (detecta-colisao tabuleiro linha accao) (peca-dentro-limites (1+ linha) accao)) (insere-peca tabuleiro peca (1+ linha) coluna) (return))
+
+           
+                    
                 )
             )
         )
-        ;(format t "YOLOOOOOOOOO")
 
         ;ACTUALIZAR A LISTA DE PECAS COLOCADAS PELA LISTA DE PECAS POR COLOCAR
         (setf (estado-pecas-colocadas new) (append (list (first (estado-pecas-por-colocar new))) (estado-pecas-colocadas new)))
@@ -725,11 +709,6 @@
         (setf (estado-pecas-por-colocar new) (rest (estado-pecas-por-colocar new)))
 
         ;VERIFICA SE ACABOU O JOGO (TOPO PREENCHIDO)
-        ;(format t "(estado-pecas-por-colocar new) = ~d ~%" (estado-pecas-por-colocar new))
-        ;(format t "(estado-pecas-colocadas new) = ~d ~%" (estado-pecas-colocadas new))
-        ;(format t "Tentei por peca: ~d " peca)
-       ; (format t "na coluna: ~d ~%" coluna)
-       ; (format t "(tabuleiro-topo-preenchido-p tabuleiro) = ~d ~%" (tabuleiro-topo-preenchido-p tabuleiro))
         (if (tabuleiro-topo-preenchido-p tabuleiro)
             (return-from resultado new) ;Se true: devolve o estado
             (progn ;Se nil: remove linhas e calc pontos calc pontos
@@ -768,29 +747,23 @@
     )
 )
 
-;(setf estado1 (make-estado :pontos 0 :pecas-por-colocar '(t i j t z j) :pecas-colocadas '() :tabuleiro (cria-tabuleiro)))
-;   (setf estado2 (resultado estado1 '(0 . #2A((T T T)(NIL T NIL)))))
-
 
 ;;; qualidade: estado -> inteiro
 (defun qualidade (estado)
     ; recebe estado e devolve inteiro que corresponde
     ; ao valor de pontos ganhos ate ao momento em valor negativo.
-    ; **** LER COM MAIS ATENCAO ****
     (* -1 (estado-pontos estado))
 )
 
 ;;; custo-oportunidade: estado -> inteiro
 (defun custo-oportunidade (estado)
     ; recebe estado e devolve inteiro que corresponde
-    ; nao percebo
     (let ((efectivament-conseguido (estado-pontos estado))
           (maximo-possivel 0)
           (todas-pecas (estado-pecas-colocadas estado))
           (custos (make-array (list 7) :initial-element 0)))  ; each position corresponds to a letter
         ; acumular todos os custos de todas as acoes ja feitas ate a data
         (dolist (peca todas-pecas)
-            ; (format t "peca=~d ~%" peca)
             (cond  ;atribuicao da respectiva pontuacao consoante o numero de linhas removidas
                 ((eq peca 'i) (setf (aref custos 0) (+ 800 (aref custos 0))))
                 ((eq peca 'j) (setf (aref custos 1) (+ 500 (aref custos 1))))
@@ -802,11 +775,9 @@
                 (t 0)
                 )
             )
-        ; (format t "custos=~d ~%" custos)
+
         ; descobrir o maior custo
         (setf maximo-possivel (reduce #'max custos))
-        ; (format t "maximo-possivel=~d ~%" maximo-possivel)
-        ; (format t "efectivament-conseguido=~d ~%" efectivament-conseguido)
         ; return difference
         (return-from custo-oportunidade (- maximo-possivel efectivament-conseguido))
     )
@@ -817,26 +788,6 @@ Algoritmos de Procura (2' parte do projecto)
 |#
 
 
-; (setf t1 (cria-tabuleiro))
-; (dotimes (coluna 9)
-;     (tabuleiro-preenche! t1 0 (+ coluna 1))
-;     (tabuleiro-preenche! t1 1 (+ coluna 1))
-;     (tabuleiro-preenche! t1 2 (+ coluna 1))
-; )
-; (setf estado1 (make-estado :pontos 0
-;                            :tabuleiro t1
-;                            :pecas-colocadas ()
-;                            :pecas-por-colocar '(o o o o o l l t t j j i i)))
-
-; (setf problema1 (make-problema :estado-inicial estado1
-;                                :solucao #'solucao
-;                                :accoes #'accoes
-;                                :resultado #'resultado
-;                                :custo-caminho #'(lambda (x) 0)))
-
-;(setf estado1 (make-estado :pontos 0 :tabuleiro (cria-tabuleiro) :pecas-colocadas () :pecas-por-colocar '(o l t s z)))
-;(setf problema1 (make-problema :estado-inicial estado1 :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
-;;; procura-pp: problema -> lista de acoes
 (defun procura-pp (problema)
     ; usa procura em profundidade primeiro em arvore
     ; para obter solucao para o problema
@@ -846,133 +797,72 @@ Algoritmos de Procura (2' parte do projecto)
     ; ultimo n a ser colocado na fronteira dever ser o primeiro a ser explorado.
     ; generico.. nao so para o tetris mas para qualquer problema
 
-
-    ; (let ((visitados (make-list)))
-    ;     (child nil)
-    ;     )
-        ; (procura-pp (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas ()
-        ;     :pecas-por-colocar '(o l t s z)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
-    ;(print (problema-estado-inicial problema))
     (let ((output (list))
           (explorados (list (list)))
           (por-explorar (list (list problema nil nil)))
           (aux (list))
           (newprob nil)
-          (FODASSE)
+          (var)
           (prob))
-        ;(format t "por-explorar length ~d ~%" (list-length por-explorar))
-        ;(format t "newprob ~d ~%" newprob)
-        ;(format t "(not (null por-explorar) ~d ~%" (not (null por-explorar)))
-        ;(format t "(list-length por-explorar) ~d ~%" (list-length por-explorar))
-        ;(format t "problema e goal? ~d ~%" (funcall #'solucao (problema-estado-inicial problema)))
-        ;(format t "~d ~%" (problema-estado-inicial problema))
-        ;(format t "~d ~%" (tabuleiro->array (estado-tabuleiro (problema-estado-inicial problema))))
-        ;(format t "(list-length por-explorar) ~d ~%" (list-length por-explorar))
-        ;(format t "FODASSE ~d ~%" output)
-        ;
-        ;(format t "#\"~d\" create new problem with this action~%" acao)
-        ;(format t "adding it to \"por-explorar\" list (~d to ~d) ~%" (list-length por-explorar) (1+ (list-length por-explorar)))
-        ; (loop while (not (funcall #'solucao (problema-estado-inicial (first por-explorar)))) do
-        ;     ; nao e objectivo, portanto vou marcar como expandido e exploara
-        ;     ; (setf por-explorar (rest por-explorar))
-        ;     (setf explorados (append (first por-explorar) explorados))
-        ;     (setf acoes (funcall #'accoes (problema-estado-inicial (first explorados))))
-        ;     (dolist (acao acoes)
-        ;         (setf novo-problema (list (make-problema :estado-inicial (funcall #'resultado (problema-estado-inicial problema) acao)
-        ;                                                  :solucao #'solucao
-        ;                                                  :accoes (funcall #'accoes (problema-estado-inicial problema))
-        ;                                                  :resultado #'resultado
-        ;                                                  :custo-caminho #'qualidade)))
 
-        ;         (setf por-explorar (append novo-problema por-explorar))
-        ;     )
-        ; )
-        ; ; e objectivo, cirar lista de acoes
-
-        ;(format t "Before while loop (not (null por-explorar)) = ~d ~%" (not (null por-explorar)))
         (loop while (not (null por-explorar)) do
 
-            ;(format t "(list-length por-explorar) ~d ~%" (list-length por-explorar))
-            ;(format t "first por explorar ~d ~%" (first por-explorar))
             (setf prob (first (first por-explorar)))
-            ;(print "depois problema")
+            
             (setf explorados (append (list (first por-explorar)) explorados))
-           ; (print "depois explorados")
+           
             (setf por-explorar (rest por-explorar))
-            ;(print "depois por-explorar")
-            ;(format t "(list-length por-explorar) ~d ~%" (list-length por-explorar))
 
-            ;(format t "problema e goal? ~d ~%" (funcall #'solucao (problema-estado-inicial problema)))
-            ;(format t "~d ~%" (problema-estado-inicial problema))
-            ;(format t "~d ~%" (tabuleiro->array (estado-tabuleiro (problema-estado-inicial problema))))
-            ;(print "ola")
-            ;(format t "(funcall (problema-solucao prob) (problema-estado-inicial prob): ~d ~%" (funcall (problema-solucao prob) (problema-estado-inicial prob)))
             (cond
                 ((funcall (problema-solucao prob) (problema-estado-inicial prob))
-                    ;(format t "FODASSE ~d ~%" output)
                     (return))
-                    ;(return-from procura-pp (problema-accoes problema)))
-                (t  ;(format t "loop over ~d acoes ~%" (list-length (funcall #'accoes (problema-estado-inicial problema))))
-                    ;(print (list-length (funcall #'accoes (problema-estado-inicial problema))))
-                    ;(print "antes accoes")
-                    ;(format t "prob: ~d ~%" (problema-accoes prob))
-                    (setf FODASSE (funcall (problema-accoes prob) (problema-estado-inicial prob)))
-                    ;(format t "fodasse: ~d ~%" FODASSE)
-                    ;(print "depois accoes")
-                    ;(format t "FODASSE ~d ~%" FODASSE)
+                    
+                (t  
+                    (setf var (funcall (problema-accoes prob) (problema-estado-inicial prob)))
 
-                    (dolist (acao FODASSE)
-                        ;(format t "#\"~d\" create new problem with this action~%" acao)
+                    (dolist (acao var)
+
 
                         (setf newprob (make-problema :estado-inicial (funcall (problema-resultado prob) (problema-estado-inicial prob) acao)
                                                            :solucao (problema-solucao prob)
                                                            :accoes (problema-accoes prob)
                                                            :resultado (problema-resultado prob)
                                                            :custo-caminho (problema-custo-caminho prob)))
-                        ;(format t "adding it to \"por-explorar\" list (~d to ~d) ~%" (list-length por-explorar) (1+ (list-length por-explorar)))
-                        ;(print "aqui")
+
                         (setf por-explorar (append (list (list newprob acao prob)) por-explorar))
                     )
 
                     (if (null por-explorar) (return-from procura-pp nil)) ;Devolve NIL no caso de nao encontrar solucao e nao ter mais nada por explorar
-                   ; (format t "last fodasse ~d ~%" (last FODASSE))
-                    ;(setf explorados (append explorados (last FODASSE)))
-                    ;(format t "is bigger ? ~d ~%" (list-length output))
                 )
             )
         )
 
-        ;(print "antes aux")
-        ;(format t "explorados: ~d ~%" explorados)
+
         (setf aux (first explorados))           ;lista
-       ; (format t "---> ~d ~%" (list-length explorados))
-        ;(print "depois aux")
+
         (setf explorados (rest explorados))     ;lista com listas
-        ;(print "depois explorados")
+
         (loop while (not (null (third aux))) do
             (if (equalp (problema-estado-inicial (third aux)) (problema-estado-inicial (first (first explorados))))
                 ;iguais
                 (progn
-                    ;(print "sao iguais")
-                    ;(format t "output: ~d ~%" output)
-                    ;(format t "second aux: ~d ~%" (second aux))
+
                     (setf output (append (list (second aux)) output))
                     (setf aux (first explorados))
                     (setf explorados (rest explorados))
                 )
                 ;diferentes
                 (progn
-                    ;(print "sao diferentes")
                     (setf explorados (rest explorados))
                 )
 
             )
         )
-        ;(print "acabou")
+
         (setf output (append (list (second aux)) output))
-        ;(format t "output: ~d ~%" output)
+
         (setf output (rest output))
-        ;(format t "output: ~d ~%" output)
+
         (return-from procura-pp output)
     )
 )
@@ -1001,27 +891,6 @@ Algoritmos de Procura (2' parte do projecto)
     )
 )
 
-;;; Teste 18 E2
-;;; procura A* num tabuleiro vazio. Nao e possivel fazer nenhuma linha, por isso aqui testamos apenas se trabalham com a lista de abertos/fronteira de acordo com a ordem especificada
-;;deve retornar IGNORE
-;(setf t1 (cria-tabuleiro))
-;(setf e1 (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(t s)))
-;(setf e2 (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(l i)))
-;(setf p1 (make-problema :estado-inicial e1
-;                        :solucao #'solucao
-;                        :accoes #'accoes
-;                         :resultado #'resultado
-;                         :custo-caminho #'qualidade))
-; (setf p2 (make-problema :estado-inicial e2
-;                         :solucao #'solucao
-;                         :accoes #'accoes
-;                         :resultado #'resultado
-;                         :custo-caminho #'custo-oportunidade))
-;;deve retornar uma lista de accoes (ver ficheiro output)
-;(procura-A* p1 #'(lambda (x) 0))
-;;deve retornar uma lista de accoes (ver ficheiro output)
-;(procura-A* p2 #'(lambda (x) 0))
-;;; procura-A*: problema x heuristica -> lista de acoes
 (defun procura-A* (problema heuristica)
     ; usa o algo procura A* em arvore para determinar a seq de acoes
     ; de modo a maximizar os pontos obtidos
@@ -1031,7 +900,7 @@ Algoritmos de Procura (2' parte do projecto)
     ; em caso de empate entre dois nos com igual valor de f
     ; deve ser escolhido o ultimo a ser colocado
     ; generico.. nao so para o tetris mas para qualuer problema
-    ; check pseuso code here -> https://en.wikipedia.org/wiki/A*_search_algorithm#Pseudocode
+
     (let* (
         (startnode (cria-node problema))
 
@@ -1052,59 +921,45 @@ Algoritmos de Procura (2' parte do projecto)
         (tentative_g_score)
         (children-node)
         (current-node nil)
-        (hack)
         (lowest-node-val infinty) ; set this varibale as "infinty" to be changed for the lowers key in the f_score
     )
 
     (setf (gethash startnode g_score) 0)
     (setf h_cost (funcall heuristica (problema-estado-inicial (node-problema startnode))))
-    (setf hack h_cost)
     (setf (gethash startnode f_score) (+ (gethash startnode g_score) h_cost))
     ;(format t "is open set not empty? = ~d (length = ~d)~%" (not (eq 0 (list-length openSet))) (list-length openSet))
     (loop while (not (eq 0 (list-length openSet))) do
         ; get the lowers node from open set with lowest fscore
-        
+        ;(format t "get lowest node from open set~%")
         (setf current-node nil)
         (setf lowest-node-val infinty)
+        
         (dolist (abc openSet)
-            (setf val (gethash abc f_score))
-            (if (<= val lowest-node-val)
-                (progn
-                    (setf lowest-node-val val)
-                    (setf current-node abc)
-                )
+           (setf val (gethash abc f_score))
+           (if (<= val lowest-node-val)
+               (progn
+                   (setf lowest-node-val val)
+                   (setf current-node abc)
+               )
             )
         )
-        ; (format t "get lowest node from open set ~d ~%" current-node)
-        ; (maphash #'(lambda (key val)
-        ;     ;(format t "val = ~d | lowest-node-val = ~d | (<= val lowest-node-val) = ~d ~%" val lowest-node-val (<= val lowest-node-val))
-        ;     (if (<= val lowest-node-val)
-        ;         (progn
-        ;             (setf current-node key)
-        ;             (setf lowest-node-val val)
-        ;         )
-        ;     ))
-        ;     f_score)
+         ; (maphash #'(lambda (key val)
+         ;    ; ;(format t "val = ~d | lowest-node-val = ~d | (<= val lowest-node-val) = ~d ~%" val lowest-node-val (<= val lowest-node-val))
+         ;    (if (<= val lowest-node-val)
+         ;         (progn
+         ;             (setf current-node key)
+         ;             (setf lowest-node-val val)
+         ;         )
+         ;     ))
+         ;     f_score)
 
         ; check if this node is the goal
         ;(format t "is current-node the goal one? ~d ~%" (funcall (problema-solucao (node-problema current-node)) (problema-estado-inicial (node-problema current-node))))
-        
-        ; SEM hack ----------------------------
-        ; (if (funcall (problema-solucao        (node-problema current-node))
-        ;         (problema-estado-inicial (node-problema current-node)))
-        ;     (return-from procura-A* (constroi-caminho cameFrom current-node))
-        ; )
-
-        ;hack ---------------------------------
-        (if (AND (funcall (problema-solucao        (node-problema current-node))
-                (problema-estado-inicial (node-problema current-node))) (eq hack 0))
+        (if (funcall (problema-solucao        (node-problema current-node))
+                     (problema-estado-inicial (node-problema current-node)))
             (return-from procura-A* (constroi-caminho cameFrom current-node))
         )
-        (if (AND (funcall (problema-solucao        (node-problema current-node))
-                (problema-estado-inicial (node-problema current-node))) (not (eq hack 0)))
-            (return-from procura-A* (reverse (constroi-caminho cameFrom current-node)))
-        )
-        ;--------------------------------------
+
 
         ;(format t "remove current-node from open set~%(openSet before size = ~d)~%" (list-length openSet))
         ; remove node from open set
@@ -1137,20 +992,10 @@ Algoritmos de Procura (2' parte do projecto)
             (if (not (member children-node closeSet))
                 (progn
                     ;(setf tentative_g_score (1+ (gethash current-node g_score)))
-                    (setf tentative_g_score (+ (gethash current-node g_score) 
-                        (funcall (problema-custo-caminho (node-problema children-node)) (problema-estado-inicial (node-problema children-node)))))
+                    (setf tentative_g_score (+ (gethash current-node g_score) (funcall (problema-custo-caminho (node-problema children-node)) (problema-estado-inicial (node-problema children-node)))))
 
-                    ; SEM hack ---------------------------------------------------------
-                    ; (if (not (member children-node openSet))
-                    ;     (setf openSet (append openSet (list children-node)))
-                    ;     (progn
-                    ;         (if (>= tentative_g_score (gethash children-node g_score))
-                    ;             (setf skip_update t)
-                    ;         )
-                    ;     )
-                    ; )
-                    ;hack ---------------------------------------------------------------
-                    (if (AND (not (member children-node openSet)) (eq hack 0))
+
+                    (if (not (member children-node openSet))
                         (setf openSet (append openSet (list children-node)))
                         (progn
                             (if (>= tentative_g_score (gethash children-node g_score))
@@ -1158,18 +1003,6 @@ Algoritmos de Procura (2' parte do projecto)
                             )
                         )
                     )
-                    (if (AND (not (member children-node openSet)) (not (eq hack 0)))
-                        (setf openSet (append (list children-node) openSet))
-                        (progn
-                            (if (>= tentative_g_score (gethash children-node g_score))
-                                (setf skip_update t)
-                            )
-                        )
-                    )
-                    ; ------------------------------------------------------------------
-
-
-
                     (if (not skip_update)
                         (progn
                             (setf (gethash children-node cameFrom) current-node)
@@ -1182,42 +1015,36 @@ Algoritmos de Procura (2' parte do projecto)
                     )
                 )
             )
+            )
         )
-        ;(format t "(hash-table-count f_score) = ~d ~%" (hash-table-count f_score))
         (remhash current-node f_score)
-        ;(format t "(hash-table-count f_score) = ~d ~%" (hash-table-count f_score))
         (remhash current-node g_score)
+
     )
-    (return-from procura-A* nil) 
-    )
-    
+    (return-from procura-A* nil)
+
 )
 
 ;;; procura-best: array x listapecas -> lista de acoes
 (defun procura-best (array lista-pecas)
-    ;;;;;; este e o avaliado
     (let* (
-    	(tabuleiro (array->tabuleiro array))
-    	(estado (make-estado
-	        :pontos 0
-	        :pecas-por-colocar lista-pecas
-	        :pecas-colocadas (list)
-	        :tabuleiro tabuleiro
+        (tabuleiro (array->tabuleiro array))
+        (estado (make-estado
+            :pontos 0
+            :pecas-por-colocar lista-pecas
+            :pecas-colocadas (list)
+            :tabuleiro tabuleiro
         ))
-		(problema (make-problema
-			:estado-inicial estado
-	    	:solucao #'solucao
-	    	:accoes #'accoes
-	    	:resultado #'resultado
-	    	:custo-caminho #'custo-oportunidade
-    	))
-    	)
+        (problema (make-problema
+            :estado-inicial estado
+            :solucao #'solucao
+            :accoes #'accoes
+            :resultado #'resultado
+            :custo-caminho #'custo-oportunidade
+        ))
+        )
 
-
-    	(return-from procura-best (procura-A* problema #'qualidade))
-        ;(return-from procura-best (procura-A* problema #'custo-oportunidade))
-        ;(return-from procura-best (procura-pp problema))
-
+        (return-from procura-best (procura-A* problema #'qualidade))
     )
 )
 
