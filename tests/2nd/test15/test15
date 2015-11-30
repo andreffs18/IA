@@ -1,0 +1,19 @@
+;;; Teste 15 E2
+;;; procura profundidade primeiro num tabuleiro muito preenchido, eventualmente vao ser feitas algumas linhas, e tb num tabuleiro que nao tem solucao
+;;deve retornar IGNORE
+(ignore-value (setf t1 (cria-tabuleiro)))
+;;deve retornar IGNORE
+(ignore-value (dotimes (linha 17) (dotimes (coluna 8) (tabuleiro-preenche! t1 linha (+ coluna 2)))))
+;;deve retornar uma lista de accoes (ver ficheiro output)
+(procura-pp (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t1 :pecas-colocadas () :pecas-por-colocar '(o l t s z)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
+;;deve retornar IGNORE
+(ignore-value (setf t2 (cria-tabuleiro)))
+;;deve retornar IGNORE
+(ignore-value (dotimes (linha 17) (dotimes (coluna 10) (tabuleiro-preenche! t2 linha coluna))))
+;;deve retornar NIL (nao existe solucao)
+(procura-pp (make-problema :estado-inicial (make-estado :pontos 0 :tabuleiro t2 :pecas-colocadas () :pecas-por-colocar '(o)) :solucao #'solucao :accoes #'accoes :resultado #'resultado :custo-caminho #'(lambda (x) 0)))
+
+;;; Output:
+
+((0 . #2A((T T) (T T))) (7 . #2A((T T T) (NIL NIL T))) (0 . #2A((NIL T) (T T) (NIL T)))
+ (5 . #2A((NIL T) (T T) (T NIL))) (3 . #2A((T NIL) (T T) (NIL T))))
