@@ -1156,7 +1156,7 @@ Algoritmos de Procura (2' parte do projecto)
 ;;; procura-best: array x listapecas -> lista de acoes
 (defun procura-best (array lista-pecas)
     ;;;;;; este e o avaliado
-    (let (
+    (let* (
     	(tabuleiro (array->tabuleiro array))
     	(estado (make-estado
 	        :pontos 0
@@ -1173,7 +1173,7 @@ Algoritmos de Procura (2' parte do projecto)
     	))
     	)
 
-    	(return-from procura-best (funcall procura-A* problema #'(lambda (x) 0)))
+    	(return-from procura-best (procura-A* problema #'(lambda (x) 0)))
     )
 )
 
