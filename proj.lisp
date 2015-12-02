@@ -26,6 +26,29 @@
     (cdr accao)
 )
 
+(defun cria-tabuleiro-array ()
+    (make-array (list T-NLINHAS T-NCOLUNAS) :initial-element nil)
+)
+;;; cria-tabuleiro {} -> tabuleiro
+(defun cria-tabuleiro-hash ()
+    ; criar o tabuleiro
+    ; devolve tabuleiro vazio
+    ; (make-array (list T-NLINHAS T-NCOLUNAS) :initial-element nil)
+    ; criar a hash primeiro e depois iterar pelo numero de linhas e colunas
+    ; umas hash e uma "lista" de pares key->value, portanto, vamos guardar a key
+    ; sendo um cons da linha coluna e o value sendo nil ou true.
+    ; eg.  "0 5" -> t , na linha zero coluna cinco existe uma peca
+    (let ((tab (make-hash-table :test 'equal)))
+        (dotimes (lin T-NLINHAS tab)
+            (dotimes (col T-NCOLUNAS tab)
+                (setf (gethash (cons lin col) tab) nil)
+            )
+        )
+    )
+)
+
+
+
 ;;; cria-tabuleiro {} -> tabuleiro
 (defun cria-tabuleiro ()
     ; criar o tabuleiro
@@ -43,6 +66,23 @@
         )
     )
 )
+
+;;; tabuleiro-preenchido-p: tabuleiro x inteiro x inteiro -> logico
+(defun tabuleiro-preenchido-p-array (tabuleiro nlinha ncoluna)
+    ; devolve true se tiver preenchida
+    ; nil caso contrario
+    ; (not (null (aref tabuleiro nlinha ncoluna)))
+    (not (null (aref tabuleiro nlinha ncoluna)))
+)
+
+;;; tabuleiro-preenchido-p: tabuleiro x inteiro x inteiro -> logico
+(defun tabuleiro-preenchido-p-hash (tabuleiro nlinha ncoluna)
+    ; devolve true se tiver preenchida
+    ; nil caso contrario
+    ; (not (null (aref tabuleiro nlinha ncoluna)))
+    (not (null (gethash (cons nlinha ncoluna) tabuleiro)))
+)
+
 
 ;;; tabuleiro-preenchido-p: tabuleiro x inteiro x inteiro -> logico
 (defun tabuleiro-preenchido-p (tabuleiro nlinha ncoluna)
@@ -113,6 +153,33 @@
         (return-from peca-dentro-limites t)
     )
 )
+
+;;; tabuleiro-preenche!: tabuleiro x inteiro x inteiro -> {}
+(defun tabuleiro-preenche-array! (tabuleiro nlinha ncoluna)
+    ; altera o tabuleiro recebido na pos nlinha ncoluna
+    ; para ficar preenchido
+    ; valida de os valores da nlinha e ncoluna sao validos
+    ; (se estao dentro dos limites do campo)
+    ; nao interessa o valor devolvido
+    (cond
+        ((not (dentro-limites nlinha ncoluna)) nil)
+        (t (setf (aref tabuleiro nlinha ncoluna) t))
+    )
+)
+
+;;; tabuleiro-preenche!: tabuleiro x inteiro x inteiro -> {}
+(defun tabuleiro-preenche-hash! (tabuleiro nlinha ncoluna)
+    ; altera o tabuleiro recebido na pos nlinha ncoluna
+    ; para ficar preenchido
+    ; valida de os valores da nlinha e ncoluna sao validos
+    ; (se estao dentro dos limites do campo)
+    ; nao interessa o valor devolvido
+    (cond
+        ((not (dentro-limites nlinha ncoluna)) nil)
+        (t (setf (gethash (cons nlinha ncoluna) tabuleiro) t))
+    )
+)
+
 
 ;;; tabuleiro-preenche!: tabuleiro x inteiro x inteiro -> {}
 (defun tabuleiro-preenche! (tabuleiro nlinha ncoluna)

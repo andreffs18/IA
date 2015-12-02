@@ -1,0 +1,30 @@
+Break 1 [7]> (time (setf tab-array (cria-tabuleiro-array)))
+Real time: 4.7E-5 sec.
+Run time: 4.6E-5 sec.
+Space: 1776 Bytes
+
+Break 1 [7]> (time (setf tab-hash (cria-tabuleiro-hash)))
+Real time: 9.27E-4 sec.
+Run time: 9.2E-4 sec.
+Space: 29064 Bytes
+
+Break 5 [11]> (time (tabuleiro-preenchido-p-array tab-array 0 0))
+Real time: 2.3E-5 sec.
+Run time: 2.1E-5 sec.
+Space: 0 Bytes
+
+Break 5 [11]> (time (tabuleiro-preenchido-p-hash tab-hash 0 0))
+Real time: 2.9E-5 sec.
+Run time: 2.8E-5 sec.
+Space: 16 Bytes
+
+Break 6 [12]> (time (tabuleiro-preenche-array! tab-array 0 0))
+Real time: 3.7E-5 sec.
+Run time: 3.7E-5 sec.
+Space: 0 Bytes
+
+
+Break 6 [12]> (time (tabuleiro-preenche-hash! tab-hash 0 0))
+Real time: 2.9E-5 sec.
+Run time: 2.9E-5 sec.
+Space: 16 Bytes
