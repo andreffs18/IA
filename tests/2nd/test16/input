@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ;;; Teste 16 E2
 ;;; procura profundidade primeiro num problema alternativo ao jogo do tetris, a implementacao da procura-pp deve ser independente do problema de procura
 ;;deve retornar uma lista de accoes (ver ficheiro output)
@@ -5,4 +6,13 @@
 
 ;;; Output:
 
+=======
+;;; Teste 16 E2
+;;; procura profundidade primeiro num problema alternativo ao jogo do tetris, a implementacao da procura-pp deve ser independente do problema de procura
+;;deve retornar uma lista de accoes (ver ficheiro output)
+(procura-pp (make-problema :estado-inicial 1 :accoes #'(lambda (e) (if (<= e 15) (list 'left 'right) ())) :resultado #'(lambda (e a) (if (eq a 'left) (* 2 e) (1+ (* 2 e)))) :solucao #'(lambda (e) (= e 13)) :custo-caminho #'(lambda (x) 0)))
+
+;;; Output:
+
+>>>>>>> 7cdf415415bf212250628cbbe860eea9b6531220
 (RIGHT LEFT RIGHT)
