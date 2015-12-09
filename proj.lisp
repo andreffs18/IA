@@ -798,7 +798,10 @@
 (defun qualidade (estado)
     ; recebe estado e devolve inteiro que corresponde
     ; ao valor de pontos ganhos ate ao momento em valor negativo.
-    (* -1 (estado-pontos estado))
+    (progn
+        (format t "(* -1 (estado-pontos estado)) = ~d~%" (* -1 (estado-pontos estado)))
+        (* -1 (estado-pontos estado))
+    )
 )
 
 ;;; custo-oportunidade: estado -> inteiro
@@ -824,6 +827,7 @@
         ; descobrir o maior custo
         (setf maximo-possivel (reduce #'max custos))
         ; return difference
+        (format t "(- maximo-possivel efectivament-conseguido) = ~d~%"  (- maximo-possivel efectivament-conseguido))
         (return-from custo-oportunidade (- maximo-possivel efectivament-conseguido))
     )
 )
